@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Challenge — Amil's Random Interests</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --blue: #3a78e0;
+  --purple: #8b5cf6;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #1a2038;
+  --muted: #5e6e96;
+  --shadow: 0 2px 12px rgba(0,10,50,0.08), 0 0 0 1px rgba(0,10,50,0.05);
+}
+body {
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(58,120,224,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(139,92,246,0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+#wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 700px;
+  padding: 0 20px 60px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 16px;
+}
+.home-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.home-link:hover { color: var(--blue); }
+.header-title {
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.score-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.score-big {
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--blue);
+  line-height: 1;
+}
+.score-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.right-info { text-align: right; }
+.diff-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 13px;
+  border-radius: 20px;
+  background: rgba(58,120,224,0.1);
+  color: var(--blue);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.q-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+.progress-track {
+  height: 10px;
+  background: rgba(58,120,224,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+.progress-note {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+.q-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 30px 28px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+.q-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.q-text {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 26px;
+  white-space: pre-line;
+}
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  border-radius: 13px;
+  border: 2px solid rgba(0,10,50,0.08);
+  background: #fafbff;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color: var(--blue);
+  background: rgba(58,120,224,0.04);
+  transform: translateX(3px);
+}
+.opt-btn:disabled { cursor: default; }
+.opt-letter {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(58,120,224,0.1);
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.opt-btn.is-correct {
+  border-color: var(--green);
+  background: rgba(16,185,129,0.07);
+}
+.opt-btn.is-correct .opt-letter {
+  background: var(--green);
+  color: white;
+}
+.opt-btn.is-wrong {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.07);
+}
+.opt-btn.is-wrong .opt-letter {
+  background: var(--red);
+  color: white;
+}
+.feedback-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  display: none;
+}
+.feedback-card.show { display: block; }
+.fb-result {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.fb-result.correct { color: var(--green); }
+.fb-result.wrong { color: var(--red); }
+.fb-delta {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.fb-delta.plus { background: rgba(16,185,129,0.12); color: var(--green); }
+.fb-delta.minus { background: rgba(239,68,68,0.12); color: var(--red); }
+.fb-exp {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+.btn-next {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+.win-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.win-overlay.show { display: flex; }
+.win-card {
+  background: white;
+  border-radius: 28px;
+  padding: 44px 36px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,30,0.25);
+  animation: pop 0.4s cubic-bezier(.17,.67,.45,1.3);
+}
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.win-icon { font-size: 72px; margin-bottom: 14px; }
+.win-title { font-size: 34px; font-weight: 900; margin-bottom: 8px; }
+.win-sub { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+.win-stats {
+  background: #f4f7ff;
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 2;
+  color: var(--text);
+  text-align: left;
+}
+.win-stats strong { color: var(--blue); font-weight: 800; }
+.btn-win {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border-radius: 13px;
+  border: none;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: opacity 0.15s;
+}
+.btn-win:hover { opacity: 0.9; }
+.btn-home {
+  display: block;
+  padding: 13px;
+  border-radius: 13px;
+  border: 2px solid rgba(0,10,50,0.1);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+  text-align: center;
+}
+.btn-home:hover { border-color: var(--blue); color: var(--blue); }
+canvas#cc { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 200; }
+</style>
+</head>
+<body>
+<canvas id="cc"></canvas>
+<div id="wrap">
+  <div class="header">
+    <a href="index.html" class="home-link">← Home</a>
+    <div class="header-title">🔢 Math Challenge</div>
+    <div style="width:70px"></div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-row">
+      <div>
+        <div class="score-big" id="score-big">0</div>
+        <div class="score-sub">out of 50 points</div>
+      </div>
+      <div class="right-info">
+        <div class="diff-badge" id="diff-badge">Level 1 · Beginner</div>
+        <div class="q-count" id="q-count">Question #1</div>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-note">+1 for correct · −1 for wrong · reach 50 to win!</div>
+  </div>
+
+  <div class="q-card" id="q-card">
+    <div class="q-label" id="q-label">Question 1</div>
+    <div class="q-text" id="q-text">Loading…</div>
+    <div class="opts" id="opts"></div>
+  </div>
+
+  <div class="feedback-card" id="feedback">
+    <div class="fb-result" id="fb-result"></div>
+    <div class="fb-delta" id="fb-delta"></div>
+    <div class="fb-exp" id="fb-exp"></div>
+    <button class="btn-next" onclick="loadNext()">Next Question →</button>
+  </div>
+</div>
+
+<div class="win-overlay" id="win-overlay">
+  <div class="win-card">
+    <div class="win-icon">🏆</div>
+    <div class="win-title">You Did It!</div>
+    <div class="win-sub">50 points reached — you conquered the Math Challenge!</div>
+    <div class="win-stats" id="win-stats"></div>
+    <button class="btn-win" onclick="resetGame()">Play Again</button>
+    <a class="btn-home" href="index.html">← Back to Home</a>
+  </div>
+</div>
+
+<script>
+// ─── Utilities ───────────────────────────────────────────────────────────────
+const rand  = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick  = arr => arr[Math.floor(Math.random() * arr.length)];
+const shuf  = arr => [...arr].sort(() => Math.random() - 0.5);
+const gcd   = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+
+function mcq(question, answer, distractors, explanation = '') {
+  const ans = String(answer);
+  const seen = new Set([ans]);
+  const wrongs = [];
+  for (const d of distractors) {
+    const ds = String(d);
+    if (!seen.has(ds) && wrongs.length < 3) { seen.add(ds); wrongs.push(ds); }
+  }
+  let pad = 1;
+  while (wrongs.length < 3) {
+    const fb = String(typeof answer === 'number' ? answer + pad * 3 : ans + pad);
+    if (!seen.has(fb)) { seen.add(fb); wrongs.push(fb); }
+    pad++;
+  }
+  return { question, opts: shuf([ans, ...wrongs]), correct: ans, explanation };
+}
+
+// ─── Question Generators ─────────────────────────────────────────────────────
+const L = {};
+
+// LEVEL 1 — Basic arithmetic
+L[1] = [
+  () => {
+    const a = rand(5,30), b = rand(5,30), ans = a+b;
+    return mcq(`What is ${a} + ${b}?`, ans, [ans-2, ans+2, ans-4],
+      `${a} + ${b} = ${ans}`);
+  },
+  () => {
+    const b = rand(3,20), ans = rand(3,25), a = ans+b;
+    return mcq(`What is ${a} − ${b}?`, ans, [a+b, ans-2, ans+2],
+      `${a} − ${b} = ${ans}`);
+  },
+  () => {
+    const a = rand(2,9), b = rand(2,9), ans = a*b;
+    return mcq(`What is ${a} × ${b}?`, ans, [a+b, ans+a, ans-b],
+      `${a} × ${b} = ${ans}`);
+  },
+  () => {
+    const b = rand(2,9), ans = rand(2,10), a = b*ans;
+    return mcq(`What is ${a} ÷ ${b}?`, ans, [ans+1, b, a-b],
+      `${a} ÷ ${b} = ${ans}`);
+  },
+];
+
+// LEVEL 2 — Simple equations & basic geometry
+L[2] = [
+  () => {
+    const x = rand(3,15), a = rand(2,10), b = x+a;
+    return mcq(`If x + ${a} = ${b}, what is x?`, x, [b, a, b+a],
+      `Subtract ${a} from both sides: x = ${b} − ${a} = ${x}`);
+  },
+  () => {
+    const x = rand(2,10), a = rand(2,5), b = a*x;
+    return mcq(`If ${a}x = ${b}, what is x?`, x, [b-a, b+a, a+x],
+      `Divide both sides by ${a}: x = ${b} ÷ ${a} = ${x}`);
+  },
+  () => {
+    const l = rand(3,14), w = rand(3,10), ans = l*w;
+    return mcq(`A rectangle has length ${l} and width ${w}. What is its area?`, ans,
+      [2*(l+w), l+w, ans+l],
+      `Area = length × width = ${l} × ${w} = ${ans}`);
+  },
+  () => {
+    const pct = pick([10,20,25,50]);
+    const den = {10:10,20:5,25:4,50:2}[pct];
+    const ans = rand(2,16), base = ans*den;
+    return mcq(`What is ${pct}% of ${base}?`, ans, [base, ans*2, base-ans],
+      `(${pct}/100) × ${base} = ${ans}`);
+  },
+];
+
+// LEVEL 3 — Two-step equations, percentages, Pythagorean triples
+L[3] = [
+  () => {
+    const x = rand(2,10), a = rand(2,4), b = rand(1,8), c = a*x+b;
+    return mcq(`Solve for x:  ${a}x + ${b} = ${c}`, x,
+      [c-b, c/a|0, c+b],
+      `Subtract ${b}: ${a}x = ${c-b}. Divide by ${a}: x = ${x}`);
+  },
+  () => {
+    const triples = [[3,4,5],[5,12,13],[6,8,10],[8,15,17],[9,12,15],[7,24,25]];
+    const [a,b,c] = pick(triples);
+    return mcq(`A right triangle has legs ${a} and ${b}. What is the hypotenuse?`, c,
+      [a+b, c+2, c-1],
+      `a² + b² = c²: ${a}² + ${b}² = ${a*a+b*b} = ${c}²`);
+  },
+  () => {
+    const mean = rand(5,15), d1 = rand(-3,3), d2 = rand(-3,3);
+    const a = mean+d1, b = mean+d2, c = mean-d1-d2;
+    const sum = a+b+c;
+    return mcq(`What is the mean of ${a}, ${b}, and ${c}?`, mean,
+      [sum, mean+1, mean-1],
+      `Sum = ${sum}. Mean = ${sum} ÷ 3 = ${mean}`);
+  },
+  () => {
+    const orig = rand(2,12)*10, pct = pick([10,20,25,50]);
+    const inc = orig*pct/100, ans = orig+inc;
+    return mcq(`A price of $${orig} increases by ${pct}%. What is the new price?`, ans,
+      [orig-inc, inc, orig*2],
+      `${pct}% of $${orig} = $${inc}. New price = $${orig} + $${inc} = $${ans}`);
+  },
+];
+
+// LEVEL 4 — Multi-step equations, function evaluation, proportions
+L[4] = [
+  () => {
+    const x = rand(2,12), b2 = rand(2,4), a = rand(1,8);
+    const c = (x+a)/b2;
+    if (!Number.isInteger(c) || c < 2) return L[4][0]();
+    return mcq(`Solve for x:  (x + ${a}) / ${b2} = ${c}`, x,
+      [b2*c+a, c-a, b2*c],
+      `Multiply both sides by ${b2}: x + ${a} = ${b2*c}. Subtract ${a}: x = ${x}`);
+  },
+  () => {
+    const a = rand(1,2), b = rand(1,4), c = rand(0,4), xv = rand(2,4);
+    const ans = a*xv*xv + b*xv + c;
+    return mcq(`If f(x) = ${a}x² + ${b}x + ${c}, what is f(${xv})?`, ans,
+      [a*xv*xv + b + c, a*xv + b*xv + c, ans+b],
+      `f(${xv}) = ${a}(${xv})² + ${b}(${xv}) + ${c} = ${a*xv*xv} + ${b*xv} + ${c} = ${ans}`);
+  },
+  () => {
+    const pricePer = rand(2,6), items1 = rand(2,5), mult = rand(2,4);
+    const items2 = items1*mult, total1 = pricePer*items1, ans = pricePer*items2;
+    return mcq(`If ${items1} pens cost $${total1}, how much do ${items2} pens cost?`, ans,
+      [total1+items2, ans+pricePer, ans-pricePer],
+      `Cost per pen = $${total1} ÷ ${items1} = $${pricePer}. For ${items2}: $${pricePer} × ${items2} = $${ans}`);
+  },
+  () => {
+    const r = rand(2,7), ans = r*r;
+    return mcq(`A circle has radius ${r}. What is its area ÷ π?`, ans,
+      [ans+r, 2*r, ans*r],
+      `Area = πr² = π × ${r}² = ${ans}π. Dividing by π gives ${ans}`);
+  },
+];
+
+// LEVEL 5 — Systems, quadratic roots, distance problems
+L[5] = [
+  () => {
+    const x = rand(4,12), y = rand(2,x-1), s = x+y, d = x-y;
+    return mcq(`If x + y = ${s} and x − y = ${d}, what is x?`, x,
+      [y, s, d],
+      `Add both equations: 2x = ${s+d}. x = ${(s+d)/2} = ${x}`);
+  },
+  () => {
+    const r1 = rand(1,7), r2 = rand(1,7);
+    const B = -(r1+r2), C = r1*r2;
+    const bStr = B<0 ? `${B}` : `+${B}`, cStr = C>=0 ? `+${C}` : `${C}`;
+    return mcq(`What are the solutions to x² ${bStr}x ${cStr} = 0?`,
+      `x = ${r1} or x = ${r2}`,
+      [`x = ${-r1} or x = ${-r2}`, `x = ${r1+1} or x = ${r2-1}`, `x = ${r1*r2} or x = ${r1+r2}`],
+      `Factor: (x − ${r1})(x − ${r2}) = 0. Solutions: x = ${r1} or x = ${r2}`);
+  },
+  () => {
+    const rate = pick([40,45,50,55,60,65,70]), time = rand(1,5), ans = rate*time;
+    return mcq(`A car travels at ${rate} mph for ${time} hour${time>1?'s':''}. How far does it travel?`, ans,
+      [rate+time, ans+rate, ans-time],
+      `Distance = speed × time = ${rate} × ${time} = ${ans} miles`);
+  },
+  () => {
+    const n = rand(3,5), start = rand(5,15);
+    const ints = Array.from({length:n}, (_,i) => start+i);
+    const sum = ints.reduce((a,b)=>a+b,0), mid = ints[Math.floor(n/2)];
+    return mcq(`The sum of ${n} consecutive integers starting at ${start} is ${sum}. What is the middle integer?`,
+      mid, [start, start+n-1, mid+1],
+      `The integers are ${ints.join(', ')}. The middle value is ${mid}`);
+  },
+];
+
+// LEVEL 6 — Combining like terms, exponent rules, quadratic expansion
+L[6] = [
+  () => {
+    const x = rand(2,10), a = rand(2,4), b = rand(1,4), c = rand(1,8);
+    const d = (a+b)*x + c;
+    return mcq(`Solve:  ${a}x + ${b}x + ${c} = ${d}`, x,
+      [d-c, Math.round((d-c)/a), x+1],
+      `Combine: ${a+b}x + ${c} = ${d}. So ${a+b}x = ${d-c}, x = ${x}`);
+  },
+  () => {
+    const base = rand(2,4), m = rand(2,4), n = rand(2,4), ans = m+n;
+    return mcq(`Simplify:  ${base}^${m} × ${base}^${n}  =  ${base}^?`, ans,
+      [m*n, Math.abs(m-n), ans+1],
+      `Same base: add exponents. ${m} + ${n} = ${ans}`);
+  },
+  () => {
+    const a = rand(1,6), b = rand(1,6), mid = a+b, last = a*b;
+    return mcq(`Expand (x + ${a})(x + ${b}). What is the coefficient of x?`, mid,
+      [last, mid+1, mid-1],
+      `(x+${a})(x+${b}) = x² + ${a}x + ${b}x + ${last} = x² + ${mid}x + ${last}`);
+  },
+  () => {
+    const price = rand(4,16)*10, disc = pick([10,20,25]);
+    const afterDisc = price*(1 - disc/100);
+    const tax = pick([10,20]);
+    const ans = afterDisc*(1 + tax/100);
+    if (!Number.isInteger(ans)) return L[6][3]();
+    return mcq(`A $${price} item is discounted ${disc}%, then ${tax}% tax is added. Final price?`, ans,
+      [price*(1-disc/100+tax/100)|0, price-disc+tax, ans+tax],
+      `After ${disc}% off: $${afterDisc}. After ${tax}% tax: $${afterDisc} × 1.${tax<10?'0':''}${tax} = $${ans}`);
+  },
+];
+
+// LEVEL 7 — Geometric sequences, probability, arithmetic sequences, work rate
+L[7] = [
+  () => {
+    const a1 = rand(2,5), r = rand(2,3), n = rand(3,5);
+    const ans = a1 * Math.pow(r, n-1);
+    return mcq(`A geometric sequence starts at ${a1} with common ratio ${r}. What is term #${n}?`, ans,
+      [a1 + r*(n-1), a1*r*n, ans+r],
+      `aₙ = a₁ × r^(n−1) = ${a1} × ${r}^${n-1} = ${a1} × ${Math.pow(r,n-1)} = ${ans}`);
+  },
+  () => {
+    const total = pick([10,20,25]);
+    const favorable = rand(1,total-1);
+    const g = gcd(favorable, total);
+    const num = favorable/g, den = total/g;
+    const ans = den===1 ? `${num}` : `${num}/${den}`;
+    const wrong1 = `${Math.min(den,num+1)}/${Math.max(den,num+1)}`;
+    const wrong2 = `${total-favorable}/${total/g}`;
+    return mcq(`A bag has ${total} marbles: ${favorable} are red. What is P(picking red)?`,
+      ans, [wrong1, wrong2, `${den}/${num}`],
+      `P = ${favorable}/${total}${g>1?` = ${num}/${den}`:''}`);
+  },
+  () => {
+    const a = rand(2,6), b = rand(2,6);
+    const num = a*b, den = a+b, g = gcd(num,den);
+    const sn = num/g, sd = den/g;
+    const ansStr = sd===1 ? `${sn}` : `${sn}/${sd}`;
+    return mcq(`Worker A finishes a job in ${a} hrs. Worker B in ${b} hrs. Together?`,
+      ansStr, [`${a+b}`, `${Math.min(a,b)}`, `${Math.max(a,b)-1}`],
+      `Combined rate = 1/${a} + 1/${b} = ${a+b}/${a*b}. Time = ${a*b}/${a+b} = ${ansStr} hrs`);
+  },
+  () => {
+    const a1 = rand(2,10), d = rand(2,5), n = rand(5,10), ans = a1 + d*(n-1);
+    return mcq(`Arithmetic sequence: first term = ${a1}, common difference = ${d}. What is term #${n}?`, ans,
+      [a1*d*(n-1)|0, ans+d, ans-d],
+      `aₙ = ${a1} + (${n}−1)×${d} = ${a1} + ${d*(n-1)} = ${ans}`);
+  },
+];
+
+// LEVEL 8 — Vertex of parabola, absolute value, function composition, complex equations
+L[8] = [
+  () => {
+    const a = rand(1,2), h = rand(-4,4);
+    if (h===0) return L[8][0]();
+    const b = -2*a*h, c = rand(0,5);
+    const bStr = b>=0 ? `+${b}` : `${b}`;
+    const cStr = c>=0 ? `+${c}` : `${c}`;
+    return mcq(`What is the x-coordinate of the vertex of\nf(x) = ${a}x² ${bStr}x ${cStr}?`, h,
+      [-h, b, h+1],
+      `x = −b/(2a) = −(${b})/(2×${a}) = ${-b}/${2*a} = ${h}`);
+  },
+  () => {
+    const av = rand(3,10), bv = rand(1,5), s1 = av+bv, s2 = av-bv;
+    return mcq(`Solve:  |x − ${av}| = ${bv}`, `x = ${s2} or x = ${s1}`,
+      [`x = ${s1}`, `x = ${av}`, `x = ${s2}`],
+      `Two cases: x−${av} = ${bv} → x = ${s1},  or x−${av} = −${bv} → x = ${s2}`);
+  },
+  () => {
+    const a = rand(2,4), b = rand(1,4), c = rand(1,3), xv = rand(2,4);
+    const gx = c*xv*xv, ans = a*gx + b;
+    return mcq(`f(x) = ${a}x + ${b},  g(x) = ${c}x².\nWhat is f(g(${xv}))?`, ans,
+      [a*c*xv*xv, c*(a*xv+b)*(a*xv+b), ans+a],
+      `g(${xv}) = ${c}(${xv})² = ${gx}.  f(${gx}) = ${a}×${gx} + ${b} = ${ans}`);
+  },
+  () => {
+    const x = rand(2,8), a = rand(2,5), b = rand(1,6), c = rand(2,4);
+    if (c===a) return L[8][3]();
+    const dNum = x*(a-c) + a*b;
+    if (dNum % c !== 0 || dNum/c <= 0) return L[8][3]();
+    const dv = dNum/c;
+    return mcq(`Solve:  ${a}(x + ${b}) = ${c}(x + ${dv})`, x,
+      [x+c, x-a, (a*b+c*dv)/(a+c)|0],
+      `Expand: ${a}x + ${a*b} = ${c}x + ${c*dv}. Rearrange: ${a-c}x = ${c*dv - a*b}. x = ${x}`);
+  },
+];
+
+// LEVEL 9 — Quadratic formula, systems of equations, discriminant
+L[9] = [
+  () => {
+    let r1, r2;
+    do { r1 = rand(-5,5); r2 = rand(-5,5); } while (r1===r2);
+    const B = -(r1+r2), C = r1*r2;
+    const bStr = B>=0 ? `+${B}` : `${B}`;
+    const cStr = C>=0 ? `+${C}` : `${C}`;
+    const [lo,hi] = [Math.min(r1,r2), Math.max(r1,r2)];
+    return mcq(`Using the quadratic formula, solve:\nx² ${bStr}x ${cStr} = 0`,
+      `x = ${lo} or x = ${hi}`,
+      [`x = ${lo+1} or x = ${hi-1}`, `x = ${-lo} or x = ${-hi}`, `x = ${lo*hi} or x = ${lo+hi}`],
+      `x = [−(${B}) ± √(${B}²−4·${C})] / 2 = [${-B} ± ${Math.abs(r1-r2)}] / 2\nSolutions: x = ${lo} or x = ${hi}`);
+  },
+  () => {
+    const x = rand(2,8), y = rand(2,6), k = x+2*y, m = 3*x-y;
+    return mcq(`Solve the system:  x + 2y = ${k},  3x − y = ${m}.\nWhat is x?`, x,
+      [y, k-x, m-x],
+      `From eq1: x = ${k} − 2y. Substitute into eq2: 3(${k}−2y) − y = ${m}. Solve: y = ${y}, x = ${x}`);
+  },
+  () => {
+    let r1, r2;
+    do { r1 = rand(-3,5); r2 = rand(-3,5); } while (r1===r2);
+    const a = r1+r2, b = -(r1*r2);
+    const bStr = b>=0 ? `+${b}` : `${b}`;
+    const aStr = a===1 ? '' : (a===-1 ? '-' : String(a));
+    const [lo,hi] = [Math.min(r1,r2), Math.max(r1,r2)];
+    return mcq(`At what x-values does y = x² intersect y = ${aStr}x ${bStr}?`,
+      `x = ${lo} and x = ${hi}`,
+      [`x = ${-lo} and x = ${-hi}`, `x = ${a} and x = ${b}`, `x = ${lo+1} and x = ${hi-1}`],
+      `Set x² = ${a===1?'':a}x ${bStr}. Rearrange: x² − ${a}x ${b<0?`+${-b}`:`${b}`} = 0. Roots: x = ${lo}, ${hi}`);
+  },
+  () => {
+    const B = pick([0,2,4]), mag = rand(1,4);
+    const C = B*B/4 + mag;
+    const disc = B*B - 4*C;
+    const bStr = B===0?'':`+${B}`, cStr = `+${C}`;
+    return mcq(`How many real solutions does x² ${bStr}x ${cStr} = 0 have?`,
+      'No real solutions',
+      ['Two real solutions', 'One real solution', 'Infinitely many solutions'],
+      `Discriminant = b²−4ac = ${B}²−4(${C}) = ${disc} < 0. Negative discriminant → no real solutions`);
+  },
+];
+
+// LEVEL 10 — Rational equations, optimization, advanced systems, function differences
+L[10] = [
+  () => {
+    const b2 = rand(1,6), c = rand(2,5), x = rand(2,8), a = c*(x+b2);
+    return mcq(`Solve:  ${a} / (x + ${b2}) = ${c}`, x,
+      [a/c|0, a-b2, c+b2],
+      `Multiply both sides by (x+${b2}): ${a} = ${c}(x+${b2}). x+${b2} = ${a/c}. x = ${x}`);
+  },
+  () => {
+    const a = pick([1,2,3]), h = rand(-4,4), k = rand(-6,5);
+    if (h===0) return L[10][1]();
+    const b = -2*a*h, c = a*h*h+k;
+    const bStr = b>=0?`+${b}`:`${b}`, cStr = c>=0?`+${c}`:`${c}`;
+    return mcq(`What is the minimum value of  f(x) = ${a}x² ${bStr}x ${cStr}?`, k,
+      [k+1, h, k-1],
+      `Vertex form: ${a}(x−${h})² + ${k}. Since a=${a}>0, minimum is ${k} (at x=${h})`);
+  },
+  () => {
+    const x = rand(2,8), y = rand(2,8), n = x+y, v = 5*x+10*y;
+    return mcq(`James has $5 and $10 bills: ${n} bills totaling $${v}. How many $5 bills?`, x,
+      [y, n-x-1, n],
+      `Let s = #$5 bills. s+(${n}−s) = ${n} and 5s+10(${n}−s) = ${v}. Solving: s = ${x}`);
+  },
+  () => {
+    const a = rand(2,4), b = rand(1,4), c = rand(1,3), x1 = rand(2,4), x2 = rand(2,4);
+    const gx2 = c*x2*x2, fgx2 = a*gx2+b;
+    const fx1 = a*x1+b, gfx1 = c*fx1*fx1;
+    const ans = fgx2 - gfx1;
+    return mcq(`f(x) = ${a}x + ${b},  g(x) = ${c}x².\nFind f(g(${x2})) − g(f(${x1})).`, ans,
+      [ans+a, fgx2+gfx1, ans-b],
+      `f(g(${x2})) = f(${gx2}) = ${fgx2}. g(f(${x1})) = g(${fx1}) = ${gfx1}. Difference = ${fgx2}−${gfx1} = ${ans}`);
+  },
+];
+
+// ─── Difficulty labels ────────────────────────────────────────────────────────
+const DIFF_LABEL = {1:'Beginner',2:'Beginner',3:'Easy',4:'Easy',5:'Medium',
+                    6:'Medium',7:'Hard',8:'Hard',9:'Advanced',10:'Advanced'};
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let score = 0;
+let difficulty = 1.0;
+let qNum = 0;
+let correct = 0;
+let wrong = 0;
+let current = null;
+
+function getLevel() { return Math.max(1, Math.min(10, Math.floor(difficulty))); }
+
+function generateQ() {
+  const level = getLevel();
+  const gens = L[level];
+  let q;
+  let tries = 0;
+  do { q = pick(gens)(); tries++; } while (!q && tries < 5);
+  return q;
+}
+
+function loadNext() {
+  document.getElementById('feedback').classList.remove('show');
+  qNum++;
+  current = generateQ();
+  render();
+}
+
+function render() {
+  const level = getLevel();
+  document.getElementById('score-big').textContent = score;
+  document.getElementById('diff-badge').textContent = `Level ${level} · ${DIFF_LABEL[level]}`;
+  document.getElementById('q-count').textContent = `Question #${qNum}`;
+  document.getElementById('q-label').textContent = `Question ${qNum}`;
+  document.getElementById('q-text').textContent = current.question;
+  const pct = Math.min(100, (score/50)*100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const optsEl = document.getElementById('opts');
+  optsEl.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  current.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${labels[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => answer(opt, btn));
+    optsEl.appendChild(btn);
+  });
+}
+
+function answer(chosen, clickedBtn) {
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === current.correct;
+
+  // Highlight all buttons
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    const text = btn.querySelector('span:last-child').textContent;
+    if (text === current.correct) btn.classList.add('is-correct');
+    else if (text === chosen && !isCorrect) btn.classList.add('is-wrong');
+  });
+
+  if (isCorrect) {
+    score++;
+    difficulty = Math.min(10, difficulty + 0.4);
+    correct++;
+  } else {
+    score = Math.max(0, score - 1);
+    difficulty = Math.max(1, difficulty - 0.3);
+    wrong++;
+  }
+
+  const fb = document.getElementById('feedback');
+  const res = document.getElementById('fb-result');
+  const delta = document.getElementById('fb-delta');
+  const exp = document.getElementById('fb-exp');
+
+  res.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+  res.className = 'fb-result ' + (isCorrect ? 'correct' : 'wrong');
+  delta.textContent = isCorrect ? '+1 point' : '−1 point';
+  delta.className = 'fb-delta ' + (isCorrect ? 'plus' : 'minus');
+  exp.textContent = current.explanation || (isCorrect ? '' : `Correct answer: ${current.correct}`);
+
+  fb.classList.add('show');
+
+  if (score >= 50) {
+    setTimeout(showWin, 600);
+  }
+}
+
+function showWin() {
+  document.getElementById('win-stats').innerHTML =
+    `<strong>${qNum}</strong> questions answered<br>` +
+    `<strong>${correct}</strong> correct · <strong>${wrong}</strong> incorrect<br>` +
+    `Accuracy: <strong>${Math.round(correct/qNum*100)}%</strong><br>` +
+    `Highest level reached: <strong>Level ${getLevel()} (${DIFF_LABEL[getLevel()]})</strong>`;
+  document.getElementById('win-overlay').classList.add('show');
+  launchConfetti();
+}
+
+function resetGame() {
+  score = 0; difficulty = 1.0; qNum = 0; correct = 0; wrong = 0;
+  document.getElementById('win-overlay').classList.remove('show');
+  document.getElementById('feedback').classList.remove('show');
+  loadNext();
+}
+
+// ─── Confetti ─────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const canvas = document.getElementById('cc');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: -20,
+    vx: (Math.random()-0.5)*4,
+    vy: Math.random()*3+2,
+    rot: Math.random()*360,
+    rotV: (Math.random()-0.5)*6,
+    color: pick(['#3a78e0','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899']),
+    w: rand(8,14), h: rand(4,8),
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotV; p.vy += 0.05;
+      if (p.y > canvas.height+20) { p.y = -20; p.x = Math.random()*canvas.width; }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI/180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 240) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// ─── Start ────────────────────────────────────────────────────────────────────
+loadNext();
+</script>
+</body>
+</html>

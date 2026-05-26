@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PerspectiveShift — See Both Sides</title>
+<title>Amil's Random Interests</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -54,12 +54,13 @@ body::before {
 /* ── PORTALS ── */
 .portals {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 22px;
   width: 100%;
   margin-bottom: 48px;
 }
-@media (max-width: 620px) { .portals { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .portals { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .portals { grid-template-columns: 1fr; } }
 
 .portal {
   border-radius: 24px;
@@ -194,6 +195,28 @@ body::before {
 .step-label { font-size: 15px; font-weight: 700; color: #1a2038; }
 .step-desc { font-size: 13px; color: #6172a0; line-height: 1.5; }
 
+/* ── MATH PORTAL ── */
+.portal-math {
+  background: #ffffff;
+  color: #1a2038;
+  box-shadow: 0 4px 20px rgba(0,10,50,0.09), 0 0 0 1px rgba(0,10,50,0.06);
+}
+.portal-math:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 40px rgba(0,10,50,0.14), 0 0 0 1px rgba(16,185,129,0.25);
+}
+.portal-math::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #3a78e0);
+  border-radius: 24px 24px 0 0;
+}
+.portal-math .p-age { color: #10b981; opacity: 1; }
+.portal-math .p-tag { background: rgba(16,185,129,0.08); color: #10b981; }
+.portal-math .p-btn { background: linear-gradient(135deg, #10b981, #3a78e0); color: white; }
+
 /* ── FOOTER ── */
 footer {
   font-size: 13px;
@@ -206,9 +229,9 @@ footer {
 <body>
 <div id="wrap">
   <div class="hero">
-    <div class="hero-logo">⚖️</div>
-    <h1 class="hero-title">PerspectiveShift</h1>
-    <p class="hero-sub">Every debate has two sides worth hearing. Pick your version and start thinking.</p>
+    <div class="hero-logo">🎲</div>
+    <h1 class="hero-title">Amil's Random Interests</h1>
+    <p class="hero-sub">A collection of interactive tools and games. Pick something and dive in.</p>
   </div>
 
   <div class="portals">
@@ -239,30 +262,23 @@ footer {
       </div>
       <div class="p-btn">Start Exploring →</div>
     </a>
+
+    <a class="portal portal-math" href="math.html">
+      <div class="p-icon">🔢</div>
+      <div class="p-age">Math Challenge</div>
+      <div class="p-title">Math<br>Challenge</div>
+      <p class="p-desc">Adaptive SAT-level math questions. Get one right and it gets harder. Reach 50 points to win!</p>
+      <div class="p-tags">
+        <span class="p-tag">➕ Algebra</span>
+        <span class="p-tag">📐 Geometry</span>
+        <span class="p-tag">📊 Stats</span>
+        <span class="p-tag">🔣 Functions</span>
+      </div>
+      <div class="p-btn">Start Challenge →</div>
+    </a>
   </div>
 
-  <div class="how">
-    <div class="how-title">How It Works</div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-label">Pick a Side</div>
-        <div class="step-desc">Before seeing any arguments, share where you stand on the topic.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-label">Read Both Sides</div>
-        <div class="step-desc">Explore the strongest arguments for and against the topic.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-label">Earn Rewards</div>
-        <div class="step-desc">Get points for engaging — and a bonus if you change your mind!</div>
-      </div>
-    </div>
-  </div>
-
-  <footer>⚖️ PerspectiveShift — Challenge your thinking, not your values.</footer>
+  <footer>🎲 Amil's Random Interests — pick something, learn something.</footer>
 </div>
 </body>
 </html>
