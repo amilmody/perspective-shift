@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerspectiveShift for Kids 🦉</title>
+<style>
+:root {
+  --bg: #f5f0ff;
+  --surface: #ffffff;
+  --border: rgba(100,50,200,0.1);
+  --text: #2d1b69;
+  --muted: #7060a0;
+  --purple: #7c3aed;
+  --purple-light: rgba(124,58,237,0.1);
+  --green: #10b981;
+  --green-light: rgba(16,185,129,0.1);
+  --rose: #f43f5e;
+  --rose-light: rgba(244,63,94,0.1);
+  --yellow: #f59e0b;
+  --yellow-light: rgba(245,158,11,0.12);
+  --r: 20px;
+  --r-sm: 14px;
+  --shadow: 0 3px 14px rgba(100,50,200,0.1), 0 0 0 1px rgba(100,50,200,0.06);
+  --shadow-hover: 0 8px 28px rgba(100,50,200,0.16), 0 0 0 1px rgba(100,50,200,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; height: 65vh;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(124,58,237,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 0%, rgba(244,63,94,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 0%, rgba(245,158,11,0.1) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+#star-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1000;
+}
+#app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 0 18px 80px; }
+
+/* ── HEADER ── */
+#main-header {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.9);
+  border-bottom: 2px solid rgba(124,58,237,0.1);
+  box-shadow: 0 2px 12px rgba(124,58,237,0.08);
+  margin: 0 -18px; padding: 12px 18px;
+}
+.header-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.home-link {
+  font-size: 12px; font-weight: 700; color: var(--purple);
+  text-decoration: none; padding: 5px 11px;
+  border: 2px solid rgba(124,58,237,0.25); border-radius: 20px;
+  background: var(--purple-light); transition: all 0.15s; white-space: nowrap;
+}
+.home-link:hover { background: var(--purple); color: white; }
+.logo { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.logo-owl { font-size: 22px; }
+.logo-text { font-size: 16px; font-weight: 800; color: var(--purple); }
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.level-pill {
+  background: linear-gradient(135deg, var(--purple), #ec4899);
+  border-radius: 20px; padding: 5px 13px;
+  font-size: 12px; font-weight: 700; white-space: nowrap; color: white;
+}
+.stars-wrap { display: flex; align-items: center; gap: 6px; }
+.star-track { width: 64px; height: 7px; background: rgba(124,58,237,0.12); border-radius: 4px; overflow: hidden; }
+.star-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fcd34d); border-radius: 4px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+.star-label { font-size: 12px; color: var(--muted); white-space: nowrap; font-weight: 600; }
+.changes-chip {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--yellow-light); border: 2px solid rgba(245,158,11,0.25);
+  border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: #92400e;
+  white-space: nowrap;
+}
+
+/* ── HOME ── */
+.hero { padding: 56px 0 44px; text-align: center; }
+.hero-owl { font-size: 64px; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+.hero h1 {
+  font-size: clamp(30px, 7vw, 52px); font-weight: 900; line-height: 1.15; margin-bottom: 14px;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 60%, #f59e0b 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 28px; line-height: 1.65; }
+.hero-stats { display: flex; justify-content: center; gap: 32px; }
+.hero-stat-num { font-size: 28px; font-weight: 900; color: var(--purple); }
+.hero-stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+.section-label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); margin-bottom: 14px; opacity: 0.7; }
+
+/* ── TOPIC GRID ── */
+.topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 48px; }
+.topic-card {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 22px; cursor: pointer;
+  transition: all 0.2s ease; position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.topic-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--purple), #ec4899); opacity: 0; transition: opacity 0.2s;
+}
+.topic-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-hover); border-color: rgba(124,58,237,0.2); }
+.topic-card:hover::after { opacity: 1; }
+.topic-card.done { border-color: rgba(16,185,129,0.3); }
+.topic-card.done::after { background: var(--green); opacity: 0.8; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.topic-emoji { font-size: 34px; line-height: 1; }
+.done-badge {
+  background: var(--green-light); color: var(--green);
+  border: 2px solid rgba(16,185,129,0.3); border-radius: 12px;
+  padding: 3px 9px; font-size: 11px; font-weight: 800;
+}
+.card-cat { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple); margin-bottom: 5px; opacity: 0.7; }
+.card-title { font-size: 17px; font-weight: 800; margin-bottom: 7px; line-height: 1.3; color: var(--text); }
+.card-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ── BADGES ── */
+.badges-section { margin-top: 8px; }
+.badges-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.badge-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r-sm); padding: 11px 14px; min-width: 148px;
+  transition: all 0.2s; box-shadow: var(--shadow);
+}
+.badge-item.on { border-color: rgba(245,158,11,0.4); background: var(--yellow-light); }
+.badge-item.off { opacity: 0.4; box-shadow: none; }
+.badge-e { font-size: 22px; }
+.badge-name { font-size: 13px; font-weight: 700; }
+.badge-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* ── TOPIC SCREEN ── */
+#topic-screen { padding-top: 24px; }
+.back-btn {
+  background: var(--purple-light); border: 2px solid rgba(124,58,237,0.2);
+  color: var(--purple); cursor: pointer; font-size: 13px; font-weight: 700;
+  padding: 8px 16px; margin-bottom: 24px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
+}
+.back-btn:hover { background: var(--purple); color: white; }
+
+/* Stepper */
+.stepper { display: flex; align-items: center; gap: 0; margin-bottom: 32px; max-width: 340px; }
+.step { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 6px; }
+.step-dot {
+  width: 32px; height: 32px; border-radius: 50%; border: 3px solid rgba(124,58,237,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--muted); background: var(--surface); transition: all 0.3s;
+}
+.step.active .step-dot { border-color: var(--purple); color: white; background: var(--purple); }
+.step.done .step-dot { border-color: var(--green); color: white; background: var(--green); }
+.step-label { font-size: 10px; color: var(--muted); white-space: nowrap; font-weight: 700; }
+.step.active .step-label { color: var(--purple); }
+.step.done .step-label { color: var(--green); }
+.step-line { flex: 0 0 28px; height: 3px; background: rgba(124,58,237,0.12); margin-top: -8px; border-radius: 2px; }
+.step-line.done { background: var(--green); }
+
+/* Phase 1 */
+.topic-hero { text-align: center; padding: 24px 0 40px; max-width: 600px; margin: 0 auto; }
+.cat-tag {
+  display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--purple); background: var(--purple-light);
+  border: 2px solid rgba(124,58,237,0.2); border-radius: 14px; padding: 5px 14px; margin-bottom: 14px;
+}
+.topic-hero h2 { font-size: clamp(22px, 5vw, 38px); font-weight: 900; margin-bottom: 12px; line-height: 1.2; color: var(--text); }
+.topic-hero p { font-size: 16px; color: var(--muted); line-height: 1.6; }
+.stance-section { max-width: 520px; margin: 0 auto; }
+.stance-prompt { text-align: center; margin-bottom: 18px; }
+.stance-prompt h3 { font-size: 18px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.stance-prompt p { color: var(--muted); font-size: 14px; }
+.stance-btns { display: flex; flex-direction: column; gap: 10px; }
+.stance-btn {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text); cursor: pointer;
+  font-size: 15px; font-weight: 700; padding: 15px 18px; text-align: left;
+  transition: all 0.15s ease; display: flex; align-items: center; gap: 13px;
+  box-shadow: var(--shadow);
+}
+.stance-btn:hover { transform: translateX(4px); box-shadow: var(--shadow-hover); border-color: rgba(124,58,237,0.25); }
+.stance-btn.sel-for { background: var(--green-light); border-color: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+.stance-btn.sel-against { background: var(--rose-light); border-color: var(--rose); box-shadow: 0 0 0 3px rgba(244,63,94,0.15); }
+.stance-btn.sel-neutral { background: var(--yellow-light); border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+.s-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+
+/* Phase 2 */
+.p2-header { text-align: center; margin-bottom: 28px; }
+.p2-header h3 { font-size: 20px; font-weight: 800; margin-bottom: 7px; }
+.p2-header p { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
+.stance-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--muted);
+  box-shadow: var(--shadow); font-weight: 600;
+}
+.stance-badge strong { color: var(--purple); }
+.read-tracker { text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 24px; font-weight: 600; }
+.read-tracker span { color: var(--purple); font-weight: 800; }
+.args-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 44px; }
+@media (max-width: 640px) { .args-grid { grid-template-columns: 1fr; } }
+.args-col { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+.col-head { padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
+.for-col .col-head { background: var(--green-light); border-bottom: 2px solid rgba(16,185,129,0.15); }
+.against-col .col-head { background: var(--rose-light); border-bottom: 2px solid rgba(244,63,94,0.15); }
+.col-head-icon { font-size: 22px; }
+.col-title { font-size: 16px; font-weight: 800; }
+.for-col .col-title { color: #059669; }
+.against-col .col-title { color: #e11d48; }
+.args-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.arg-card {
+  background: #fafbff; border: 2px solid rgba(124,58,237,0.07);
+  border-radius: var(--r-sm); padding: 14px; cursor: pointer;
+  transition: all 0.15s; user-select: none;
+}
+.arg-card:hover { background: #f3eeff; border-color: rgba(124,58,237,0.18); transform: scale(1.01); }
+.arg-card.open { background: #f3eeff; border-color: rgba(124,58,237,0.22); }
+.arg-headline {
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; line-height: 1.4;
+  color: var(--text);
+}
+.arg-toggle { font-size: 13px; color: var(--purple); flex-shrink: 0; transition: transform 0.2s; opacity: 0.6; }
+.arg-card.open .arg-toggle { transform: rotate(180deg); opacity: 1; }
+.arg-body { font-size: 13px; color: var(--muted); line-height: 1.65; margin-top: 10px; display: none; }
+.arg-card.open .arg-body { display: block; }
+
+.final-prompt { max-width: 520px; margin: 0 auto; text-align: center; }
+.final-prompt h3 { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+.final-prompt > p { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+
+/* Phase 3 */
+.results-wrap { max-width: 520px; margin: 0 auto; text-align: center; padding: 44px 0 24px; }
+.result-icon { font-size: 72px; margin-bottom: 16px; display: block; animation: bounceIn 0.55s cubic-bezier(0.175,0.885,0.32,1.275); }
+.result-title { font-size: 28px; font-weight: 900; margin-bottom: 10px; color: var(--text); }
+.result-msg {
+  font-size: 16px; color: var(--muted); line-height: 1.65; margin-bottom: 28px;
+  max-width: 400px; margin-left: auto; margin-right: auto;
+}
+.stars-block {
+  background: var(--yellow-light); border: 2px solid rgba(245,158,11,0.35);
+  border-radius: var(--r); padding: 22px 28px; margin-bottom: 20px;
+  display: inline-block; min-width: 200px; box-shadow: var(--shadow);
+}
+.stars-big { font-size: 44px; font-weight: 900; color: var(--yellow); line-height: 1; }
+.stars-label { font-size: 14px; color: #92400e; font-weight: 700; margin-top: 4px; margin-bottom: 12px; }
+.stars-breakdown { text-align: left; border-top: 2px solid rgba(245,158,11,0.2); padding-top: 10px; }
+.stars-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); padding: 3px 0; font-weight: 600; }
+.stars-row span:last-child { color: #b45309; font-weight: 800; }
+.compare-card {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 20px;
+  text-align: left; box-shadow: var(--shadow);
+}
+.compare-label { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; opacity: 0.7; }
+.compare-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stance-pill { border-radius: 14px; padding: 6px 14px; font-size: 13px; font-weight: 700; }
+.pill-for { background: var(--green-light); color: #059669; border: 2px solid rgba(16,185,129,0.3); }
+.pill-against { background: var(--rose-light); color: #e11d48; border: 2px solid rgba(244,63,94,0.3); }
+.pill-neutral { background: var(--yellow-light); color: #b45309; border: 2px solid rgba(245,158,11,0.3); }
+.arrow-txt { color: var(--purple); font-size: 20px; font-weight: 900; }
+.new-badges { margin-bottom: 22px; }
+.unlock-label { font-size: 14px; font-weight: 800; color: var(--yellow); margin-bottom: 10px; }
+.badge-unlock-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--yellow-light); border: 2px solid rgba(245,158,11,0.35);
+  border-radius: 14px; padding: 11px 16px; margin: 4px; box-shadow: var(--shadow);
+  animation: popIn 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.cta-btn {
+  background: linear-gradient(135deg, var(--purple), #ec4899);
+  border: none; border-radius: var(--r-sm); color: #fff;
+  cursor: pointer; font-size: 16px; font-weight: 800; padding: 16px 42px; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
+.cta-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 28px rgba(124,58,237,0.4); }
+
+/* Utilities */
+.hidden { display: none !important; }
+.phase { animation: fadeUp 0.3s ease; }
+
+@keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 55% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes popIn { 0% { transform: scale(0.7) rotate(-5deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+@media (max-width: 500px) { .level-pill { display: none; } .star-track { width: 44px; } }
+</style>
+</head>
+<body>
+<canvas id="star-canvas"></canvas>
+<div id="app">
+  <header id="main-header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <a href="index.html" class="home-link">← Home</a>
+        <div class="logo" onclick="goHome()">
+          <span class="logo-owl">🦉</span>
+          <span class="logo-text">PerspectiveShift</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="level-pill" id="level-pill">Explorer</div>
+        <div class="stars-wrap">
+          <div class="star-track"><div class="star-fill" id="star-fill" style="width:0%"></div></div>
+          <span class="star-label">⭐ <span id="star-label">0</span></span>
+        </div>
+        <div class="changes-chip">🔄 <span id="hdr-changes">0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <div id="home-screen">
+    <div class="hero">
+      <div class="hero-owl">🦉</div>
+      <h1>Think About<br>Both Sides!</h1>
+      <p class="hero-sub">Big questions don't always have one answer. Explore both sides, earn stars, and become a better thinker!</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num" id="s-explored">0</div><div class="hero-stat-label">topics done</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="s-stars">⭐0</div><div class="hero-stat-label">stars earned</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="s-changes">0</div><div class="hero-stat-label">mind changes</div></div>
+      </div>
+    </div>
+    <div class="section-label">Pick a Topic</div>
+    <div class="topics-grid" id="topics-grid"></div>
+    <div class="badges-section">
+      <div class="section-label">Your Badges</div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+  </div>
+
+  <!-- TOPIC SCREEN -->
+  <div id="topic-screen" class="hidden">
+
+    <!-- Phase 1 -->
+    <div id="phase-1" class="phase">
+      <button class="back-btn" onclick="goHome()">← All Topics</button>
+      <div class="stepper">
+        <div class="step active"><div class="step-dot">1</div><div class="step-label">Your Think</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot">2</div><div class="step-label">Both Sides</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot">3</div><div class="step-label">Stars!</div></div>
+      </div>
+      <div class="topic-hero">
+        <div class="cat-tag" id="p1-cat"></div>
+        <h2 id="p1-title"></h2>
+        <p id="p1-desc"></p>
+      </div>
+      <div class="stance-section">
+        <div class="stance-prompt">
+          <h3>What do YOU think — before you see any reasons?</h3>
+          <p>No peeking first! Just go with your gut. 😊</p>
+        </div>
+        <div class="stance-btns" id="p1-btns"></div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div id="phase-2" class="phase hidden">
+      <button class="back-btn" onclick="showPhase(1)">← Change my answer</button>
+      <div class="stepper">
+        <div class="step done"><div class="step-dot">✓</div><div class="step-label">Your Think</div></div>
+        <div class="step-line done"></div>
+        <div class="step active"><div class="step-dot">2</div><div class="step-label">Both Sides</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot">3</div><div class="step-label">Stars!</div></div>
+      </div>
+      <div class="p2-header">
+        <h3 id="p2-title"></h3>
+        <p>Tap on any reason to read more about it! 👇</p>
+        <div class="stance-badge">You started out: <strong id="p2-initial"></strong></div>
+      </div>
+      <div class="read-tracker">You've read <span id="read-count">0</span> out of 6 reasons</div>
+      <div class="args-grid">
+        <div class="args-col for-col">
+          <div class="col-head"><span class="col-head-icon">✅</span><span class="col-title" id="p2-for-title"></span></div>
+          <div class="args-list" id="p2-for-args"></div>
+        </div>
+        <div class="args-col against-col">
+          <div class="col-head"><span class="col-head-icon">❌</span><span class="col-title" id="p2-against-title"></span></div>
+          <div class="args-list" id="p2-against-args"></div>
+        </div>
+      </div>
+      <div class="final-prompt">
+        <h3>Now what do you think? 🤔</h3>
+        <p>Did reading both sides change your mind? That's totally okay!</p>
+        <div class="stance-btns" id="p2-btns"></div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div id="phase-3" class="phase hidden">
+      <div class="results-wrap">
+        <span class="result-icon" id="p3-icon"></span>
+        <h2 class="result-title" id="p3-title"></h2>
+        <p class="result-msg" id="p3-msg"></p>
+        <div class="stars-block">
+          <div class="stars-big" id="p3-stars">+0 ⭐</div>
+          <div class="stars-label">stars earned!</div>
+          <div class="stars-breakdown" id="p3-breakdown"></div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-label">Your Journey</div>
+          <div class="compare-row" id="p3-compare"></div>
+        </div>
+        <div class="new-badges" id="p3-badges"></div>
+        <button class="cta-btn" onclick="goHome()">Try Another Topic! 🚀</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const STANCES = [
+  { v:  2, label: 'Totally for it! 🎉', short: 'Totally For', icon: '🙌', cls: 'sel-for' },
+  { v:  1, label: 'Kind of for it 👍',  short: 'Kind of For', icon: '👍', cls: 'sel-for' },
+  { v:  0, label: "Not sure yet 🤔",    short: 'Not Sure',    icon: '🤔', cls: 'sel-neutral' },
+  { v: -1, label: 'Kind of against it 🤷', short: 'Kind of Against', icon: '🤷', cls: 'sel-against' },
+  { v: -2, label: 'Totally against it! 🙅', short: 'Totally Against', icon: '🙅', cls: 'sel-against' },
+];
+const stanceMap = {};
+STANCES.forEach(s => { stanceMap[s.v] = s; });
+
+const LEVELS = [
+  { name: '🌱 Explorer', min: 0 }, { name: '💡 Thinker', min: 60 },
+  { name: '❓ Question Master', min: 150 }, { name: '🧙 Mind Wizard', min: 280 },
+  { name: '⭐ Wisdom Star', min: 500 },
+];
+
+const BADGES = [
+  { id: 'first',   e: '🌱', name: 'First Step!',      desc: 'Finished your first topic',   ok: s => s.done.length >= 1 },
+  { id: 'open',    e: '💫', name: 'Open Thinker',      desc: 'Changed your mind once',       ok: s => s.changes >= 1 },
+  { id: 'three',   e: '🗺️', name: 'Topic Explorer',    desc: 'Tried 3 different topics',     ok: s => s.done.length >= 3 },
+  { id: 'triple',  e: '🌀', name: 'Mind Changer',      desc: 'Changed your mind 3 times',    ok: s => s.changes >= 3 },
+  { id: 'reader',  e: '📚', name: 'Super Reader',       desc: 'Read all reasons on a topic',  ok: s => s.fullReads >= 1 },
+  { id: 'all',     e: '🏆', name: 'Wisdom Star',        desc: 'Explored every single topic!', ok: s => s.done.length >= TOPICS.length },
+];
+
+const TOPICS = [
+  { id: 'screentime', emoji: '📱', cat: 'Daily Life',
+    title: 'Screen Time Limits',
+    sub: 'Should parents set rules about how much time kids spend on phones, tablets, and computers?',
+    forTitle: 'Reasons FOR Limits', againstTitle: 'Reasons AGAINST Limits',
+    forArgs: [
+      { h: 'Sleep better at night', b: "Screens before bed trick your brain into staying awake! Kids who get enough sleep feel happier, learn better in school, and have more energy for fun activities the next day." },
+      { h: 'Time for other awesome things', b: "When you put down the screen, you might discover you love drawing, playing outside, reading, or building things — activities that can become lifelong passions!" },
+      { h: 'Protect your eyes and brain', b: "Staring at screens for hours can cause headaches, tired eyes, and make it hard to focus on other things. Your brain needs quiet time to rest and recharge too." },
+    ],
+    againstArgs: [
+      { h: 'Screens can teach you stuff!', b: "Tons of apps, games, and videos teach real skills like math, coding, reading, and science. Watching a nature documentary or learning to code is real learning — not just wasted time!" },
+      { h: 'Kids can learn to choose wisely', b: "Being told exactly when to stop doesn't teach you to make good choices. Learning to manage your own time is an important skill that will help you your whole life." },
+      { h: 'Staying connected with people you love', b: "Video calls with grandparents who live far away, online games with a friend who moved — screens help you keep real friendships alive across distances." },
+    ],
+  },
+  { id: 'homework', emoji: '🎒', cat: 'School',
+    title: 'Homework After School',
+    sub: 'Should students get homework to do at home after a full day of school?',
+    forTitle: 'Reasons FOR Homework', againstTitle: 'Reasons AGAINST Homework',
+    forArgs: [
+      { h: 'Practice makes you better!', b: "Just like shooting hoops every day makes you a better basketball player, homework helps your brain remember what you learned. The more you practice, the stronger those skills get!" },
+      { h: 'Learn to work on your own', b: "Figuring out problems without your teacher right there builds confidence! Tackling challenges independently is a superpower you'll use for the rest of your life." },
+      { h: 'A chance to catch up', b: "If something in class felt confusing, homework gives you quiet time to work through it carefully before the next lesson. You get to go at your own pace." },
+    ],
+    againstArgs: [
+      { h: "School is already a really long day!", b: "Kids spend 6+ hours focused and learning at school. Brains get tired! Free time after school to play, rest, and recharge is really important for being ready to learn tomorrow." },
+      { h: 'Family time and fun matters too', b: "Homework cuts into time for hobbies, sports, family dinners, and playing outside. Those things help you grow as a person just as much as academics!" },
+      { h: 'Teachers have all day to teach', b: "If school is 6 hours long, there should be enough time to cover everything there. Bringing schoolwork home means less time for the rest of life's important things." },
+    ],
+  },
+  { id: 'uniforms', emoji: '👔', cat: 'School',
+    title: 'School Uniforms',
+    sub: 'Should all schools require every student to wear the same uniform every day?',
+    forTitle: 'Reasons FOR Uniforms', againstTitle: 'Reasons AGAINST Uniforms',
+    forArgs: [
+      { h: "No more 'wrong clothes' worries", b: "When everyone wears the same thing, nobody can tease you for not having the coolest brand or the latest style. It makes things fair and equal for everyone, no matter what their family can afford." },
+      { h: 'Mornings get SO much easier', b: "No more staring at your closet forever wondering what to wear! Uniforms mean you're dressed and ready super fast, which means more time for breakfast or a few extra minutes of sleep." },
+      { h: 'Feel like part of a team', b: "Wearing matching colors with your whole school creates a sense of belonging — like wearing a jersey on a sports team. You're all in it together!" },
+    ],
+    againstArgs: [
+      { h: "Clothes are one way to say 'this is me!'", b: "What you wear is a way to show your creativity and personality. Uniforms take away that chance every single day. Being able to express yourself matters!" },
+      { h: 'Comfort really matters for learning', b: "Some uniforms are scratchy, stiff, or just uncomfortable to sit in for 7 hours straight. When you feel uncomfortable in your body, it's harder to focus and learn." },
+      { h: "Uniforms don't fix bullying", b: "Even when everyone wears the same clothes, kids still find other reasons to be mean. Matching outfits don't fix the real problem — teaching kindness does." },
+    ],
+  },
+  { id: 'recess', emoji: '⚽', cat: 'School',
+    title: 'Longer Recess',
+    sub: 'Should schools give students more time for recess and outdoor play during the school day?',
+    forTitle: 'Reasons FOR More Recess', againstTitle: 'Reasons AGAINST More Recess',
+    forArgs: [
+      { h: 'Move more, think more!', b: "Science shows that kids who get to move and play during the day actually focus BETTER in class afterward. Your brain works best when your body gets to run around first!" },
+      { h: 'Exercise keeps you strong and healthy', b: "Kids need about an hour of physical activity every day to stay healthy. Longer recess makes it easy to hit that goal while having a blast with friends!" },
+      { h: 'Learn how to be a great friend', b: "Recess is where you practice sharing, taking turns, solving disagreements, and working together. Those social skills are things you'll use your whole life." },
+    ],
+    againstArgs: [
+      { h: 'Less recess means more learning time', b: "School days are already packed with important subjects. More time outside means less time for reading, math, science, and art — things kids need to learn before moving to the next grade." },
+      { h: "Weather doesn't always cooperate", b: "In places with freezing winters or rainy seasons, long outdoor recess isn't always comfortable or safe. More recess time works better in some places than others." },
+      { h: 'Not every kid loves running around', b: "Some kids love books, art, or chess club more than sports. Extra outdoor recess might actually be less fun for kids who prefer quieter activities." },
+    ],
+  },
+  { id: 'classpets', emoji: '🐾', cat: 'School',
+    title: 'Classroom Pets',
+    sub: 'Should every classroom be allowed to have a pet animal to take care of together?',
+    forTitle: 'Reasons FOR Class Pets', againstTitle: 'Reasons AGAINST Class Pets',
+    forArgs: [
+      { h: 'Learn real responsibility', b: "Feeding, cleaning, and caring for an animal teaches you to be dependable — and to think about someone besides yourself. That's what being a caring person is all about!" },
+      { h: 'Animals help you feel calm and happy', b: "Research shows that being around animals lowers stress and anxiety. A class pet can make even the most nervous school day feel a little better and more cozy." },
+      { h: 'Living science in your own classroom!', b: "Watching how a guinea pig eats, sleeps, plays, and communicates is way more interesting than just reading about animals. Real science happening right in front of you!" },
+    ],
+    againstArgs: [
+      { h: 'Some kids are allergic or afraid', b: "Allergies and fears of animals are very real. A classroom pet could make school uncomfortable — or even dangerous — for classmates with allergies. Everyone's safety matters." },
+      { h: 'Classrooms can be stressful for animals', b: "Loud voices, bright lights, and lots of different hands touching them can actually be really scary for small animals. Is it fair to the pet to live like that?" },
+      { h: "It's a lot of extra work for teachers", b: "Feeding, cleaning cages, and finding someone to care for the pet on holidays and weekends adds a big job to teachers' already very busy schedules." },
+    ],
+  },
+  { id: 'junkfood', emoji: '🍕', cat: 'Health',
+    title: 'Junk Food at School',
+    sub: 'Should schools be allowed to sell candy, chips, and other junk food in the cafeteria?',
+    forTitle: 'Reasons FOR Junk Food', againstTitle: 'Reasons AGAINST Junk Food',
+    forArgs: [
+      { h: 'A treat can make your day better', b: "Sometimes a snack you love makes a tough day feel brighter! A small treat at lunch can lift your mood, give you energy, and make school a little more enjoyable." },
+      { h: 'Kids will get it somewhere anyway', b: "If schools don't sell it, kids just bring it from home or buy it on the way to school. Banning junk food at school doesn't really stop kids from eating it." },
+      { h: 'Learning balance is a life skill', b: "Having a treat sometimes — not every single day, just occasionally — teaches kids about enjoying foods in moderation. That balanced approach helps build healthy habits for life." },
+    ],
+    againstArgs: [
+      { h: 'Sugar makes it hard to focus!', b: "After sugary snacks, your energy spikes and then crashes fast, making you feel tired and distracted. The absolute worst time for a sugar crash is right in the middle of class!" },
+      { h: "It's not safe for every student", b: "Kids with diabetes, food allergies, or certain health conditions can be seriously hurt by junk food. It's not fair to put tempting dangerous food in front of them every single day." },
+      { h: 'Healthy food actually tastes great too', b: "Fruits, cheese sticks, whole-grain crackers, and nuts taste delicious AND give you steady energy all afternoon. Schools can make healthy food feel exciting and yummy!" },
+    ],
+  },
+];
+
+// STATE
+const DEF = { stars: 0, changes: 0, done: [], badges: [], fullReads: 0, tid: null, init: null };
+let S = (()=>{ try { const r = localStorage.getItem('ps_kids_v1'); return r ? {...DEF,...JSON.parse(r)} : {...DEF}; } catch { return {...DEF}; } })();
+let openCount = 0;
+function save() { localStorage.setItem('ps_kids_v1', JSON.stringify(S)); }
+
+function levelInfo(stars) {
+  let li = 0;
+  for (let i = LEVELS.length-1; i >= 0; i--) { if (stars >= LEVELS[i].min) { li = i; break; } }
+  const cur = LEVELS[li], nxt = LEVELS[li+1];
+  return { name: cur.name, pct: Math.min(100, ((stars-cur.min) / (nxt ? nxt.min-cur.min : 100)) * 100) };
+}
+
+function updateHeader() {
+  const L = levelInfo(S.stars);
+  document.getElementById('level-pill').textContent = L.name;
+  document.getElementById('star-fill').style.width = L.pct + '%';
+  document.getElementById('star-label').textContent = S.stars;
+  document.getElementById('hdr-changes').textContent = S.changes;
+}
+
+function renderHome() {
+  updateHeader();
+  document.getElementById('s-explored').textContent = S.done.length;
+  document.getElementById('s-stars').textContent = '⭐' + S.stars;
+  document.getElementById('s-changes').textContent = S.changes;
+
+  document.getElementById('topics-grid').innerHTML = TOPICS.map(t => {
+    const isDone = S.done.includes(t.id);
+    return `<div class="topic-card${isDone?' done':''}" onclick="startTopic('${t.id}')">
+      <div class="card-top"><span class="topic-emoji">${t.emoji}</span>${isDone?'<span class="done-badge">✓ Done!</span>':''}</div>
+      <div class="card-cat">${t.cat}</div><div class="card-title">${t.title}</div>
+      <div class="card-desc">${t.sub}</div></div>`;
+  }).join('');
+
+  document.getElementById('badges-grid').innerHTML = BADGES.map(b => {
+    const on = S.badges.includes(b.id);
+    return `<div class="badge-item ${on?'on':'off'}"><span class="badge-e">${on?b.e:'🔒'}</span>
+      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div></div>`;
+  }).join('');
+}
+
+function goHome() {
+  document.getElementById('home-screen').classList.remove('hidden');
+  document.getElementById('topic-screen').classList.add('hidden');
+  S.tid = null; S.init = null; save(); renderHome();
+}
+
+function showPhase(n) {
+  [1,2,3].forEach(i => document.getElementById('phase-'+i).classList.toggle('hidden', i!==n));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function startTopic(id) {
+  const t = TOPICS.find(x => x.id===id); if (!t) return;
+  S.tid = id; S.init = null; openCount = 0; save();
+  document.getElementById('home-screen').classList.add('hidden');
+  document.getElementById('topic-screen').classList.remove('hidden');
+  document.getElementById('p1-cat').textContent = t.cat;
+  document.getElementById('p1-title').textContent = t.title;
+  document.getElementById('p1-desc').textContent = t.sub;
+  buildStanceBtns('p1-btns', 'pickInit', null);
+  showPhase(1);
+}
+
+function buildStanceBtns(cid, fn, sel) {
+  document.getElementById(cid).innerHTML = STANCES.map(s =>
+    `<button class="stance-btn${sel===s.v?' '+s.cls:''}" onclick="${fn}(${s.v})">
+       <span class="s-icon">${s.icon}</span>${s.label}</button>`).join('');
+}
+
+function pickInit(v) {
+  S.init = v; save();
+  buildStanceBtns('p1-btns', 'pickInit', v);
+  setTimeout(loadPhase2, 320);
+}
+
+function loadPhase2() {
+  const t = TOPICS.find(x => x.id===S.tid); if (!t) return;
+  openCount = 0;
+  document.getElementById('p2-title').textContent = t.title;
+  document.getElementById('p2-initial').textContent = stanceMap[S.init].short;
+  document.getElementById('p2-for-title').textContent = t.forTitle;
+  document.getElementById('p2-against-title').textContent = t.againstTitle;
+  document.getElementById('read-count').textContent = '0';
+  document.getElementById('p2-for-args').innerHTML = t.forArgs.map(a =>
+    `<div class="arg-card" onclick="toggleArg(this)">
+       <div class="arg-headline">${a.h} <span class="arg-toggle">▾</span></div>
+       <div class="arg-body">${a.b}</div></div>`).join('');
+  document.getElementById('p2-against-args').innerHTML = t.againstArgs.map(a =>
+    `<div class="arg-card" onclick="toggleArg(this)">
+       <div class="arg-headline">${a.h} <span class="arg-toggle">▾</span></div>
+       <div class="arg-body">${a.b}</div></div>`).join('');
+  buildStanceBtns('p2-btns', 'pickFinal', null);
+  showPhase(2);
+}
+
+function toggleArg(el) {
+  const wasOpen = el.classList.contains('open');
+  el.classList.toggle('open');
+  if (!wasOpen) { openCount = Math.min(6, openCount+1); document.getElementById('read-count').textContent = openCount; }
+}
+
+function pickFinal(v) {
+  const t = TOPICS.find(x => x.id===S.tid); if (!t) return;
+  buildStanceBtns('p2-btns', 'pickFinal', v);
+  const init = S.init, final = v, changed = init!==final, shift = Math.abs(final-init);
+
+  let stars = 10, bkd = [{l:'Finished the topic! 🎉', x:10}];
+  if (openCount >= 6) { stars+=15; bkd.push({l:'Read ALL the reasons! 📚', x:15}); S.fullReads++; }
+  else if (openCount >= 3) { stars+=7; bkd.push({l:'Read several reasons 👀', x:7}); }
+  if (changed) {
+    const bonus = shift>=2 ? 40 : 25;
+    stars += bonus;
+    bkd.push({l: shift>=2 ? 'Wow, big mind change! 🌀' : 'Changed your mind! 🧠', x: bonus});
+    S.changes++;
+  } else {
+    stars += 5;
+    bkd.push({l:'Stood your ground! 💪', x:5});
+  }
+  if (!S.done.includes(t.id)) S.done.push(t.id);
+  S.stars += stars;
+  const newB = BADGES.filter(b => !S.badges.includes(b.id) && b.ok(S));
+  newB.forEach(b => S.badges.push(b.id));
+  save();
+  setTimeout(() => showResults(t, init, final, changed, shift, stars, bkd, newB), 250);
+}
+
+function showResults(t, init, final, changed, shift, stars, bkd, newB) {
+  const icon = changed ? (shift>=2 ? '🌈' : '🧠') : '💪';
+  const title = changed
+    ? (shift>=2 ? 'Wow, Big Change!' : 'You Changed Your Mind!')
+    : 'You Stood Your Ground!';
+  const msg = changed
+    ? `You started out "${stanceMap[init].short}" and ended up "${stanceMap[final].short}" on ${t.title}. Changing your mind when you learn new things is a SUPERPOWER! 🦸`
+    : `You thought about both sides and decided you still think "${stanceMap[final].short}." Sticking with what you believe after hearing both sides shows real confidence! ⭐`;
+
+  document.getElementById('p3-icon').textContent = icon;
+  document.getElementById('p3-title').textContent = title;
+  document.getElementById('p3-msg').textContent = msg;
+  document.getElementById('p3-stars').textContent = '+' + stars + ' ⭐';
+  document.getElementById('p3-breakdown').innerHTML = bkd.map(b =>
+    `<div class="stars-row"><span>${b.l}</span><span>+${b.x} ⭐</span></div>`).join('');
+
+  const pilFor = v => {
+    const s = stanceMap[v];
+    const cls = v>0 ? 'pill-for' : v<0 ? 'pill-against' : 'pill-neutral';
+    return `<span class="stance-pill ${cls}">${s.icon} ${s.short}</span>`;
+  };
+  document.getElementById('p3-compare').innerHTML = pilFor(init) + (changed ? `<span class="arrow-txt">→</span>${pilFor(final)}` : '');
+
+  document.getElementById('p3-badges').innerHTML = newB.length
+    ? `<div class="unlock-label">🏅 New Badge!</div>` + newB.map(b =>
+      `<div class="badge-unlock-item"><span style="font-size:24px">${b.e}</span>
+       <div><div style="font-weight:800;font-size:14px">${b.name}</div>
+       <div style="font-size:12px;color:var(--muted)">${b.desc}</div></div></div>`).join('') : '';
+
+  showPhase(3);
+  updateHeader();
+  if (changed) setTimeout(() => launchStars(shift >= 2), 300);
+}
+
+function launchStars(big) {
+  const cv = document.getElementById('star-canvas');
+  const cx = cv.getContext('2d');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const count = big ? 180 : 100;
+  const emojis = big ? ['⭐','🌟','✨','💫','🌈','🎉','🏆'] : ['⭐','✨','💫','🎉'];
+  const pts = Array.from({length: count}, () => ({
+    x: Math.random() * cv.width, y: -20,
+    size: Math.random() * 18 + 12,
+    dy: Math.random() * 6 + 3, dx: Math.random() * 5 - 2.5,
+    e: emojis[Math.random() * emojis.length | 0],
+    rot: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 8,
+    opacity: 1,
+  }));
+  let f = 0;
+  function draw() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    pts.forEach(p => {
+      p.y += p.dy; p.x += p.dx; p.rot += p.rotSpeed;
+      if (f > 120) p.opacity = Math.max(0, p.opacity - 0.015);
+      cx.save();
+      cx.globalAlpha = p.opacity;
+      cx.font = p.size + 'px serif';
+      cx.translate(p.x, p.y);
+      cx.rotate(p.rot * Math.PI / 180);
+      cx.fillText(p.e, -p.size/2, p.size/2);
+      cx.restore();
+    });
+    if (++f < 200) requestAnimationFrame(draw);
+    else cx.clearRect(0, 0, cv.width, cv.height);
+  }
+  draw();
+}
+
+renderHome();
+</script>
+</body>
+</html>

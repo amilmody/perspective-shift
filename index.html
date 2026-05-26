@@ -5,1232 +5,264 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PerspectiveShift — See Both Sides</title>
 <style>
-:root {
-  --bg: #eef1f9;
-  --surface: #ffffff;
-  --surface-hover: #f5f7ff;
-  --border: rgba(0,10,40,0.08);
-  --border-hover: rgba(0,10,40,0.16);
-  --text: #1a2038;
-  --muted: #5e6e96;
-  --pro: #3a78e0;
-  --pro-bg: rgba(58,120,224,0.09);
-  --con: #d96830;
-  --con-bg: rgba(217,104,48,0.09);
-  --gold: #d4870a;
-  --green: #17a06a;
-  --shadow: 0 2px 10px rgba(0,10,50,0.07), 0 0 0 1px rgba(0,10,50,0.04);
-  --shadow-hover: 0 6px 22px rgba(0,10,50,0.11), 0 0 0 1px rgba(0,10,50,0.07);
-  --r: 18px;
-  --r-sm: 12px;
-}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: #f4f6fb;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 body::before {
   content: '';
   position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 70vh;
+  top: 0; left: 0; right: 0; bottom: 0;
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(58,120,224,0.16) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 0%, rgba(217,104,48,0.13) 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.09) 0%, transparent 60%);
+    radial-gradient(ellipse at 20% 10%, rgba(124,58,237,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(58,120,224,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(236,72,153,0.07) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
-#confetti-canvas {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 1000;
-}
-#app {
-  position: relative;
-  z-index: 1;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 0 20px 80px;
-}
+#wrap { position: relative; z-index: 1; width: 100%; max-width: 920px; padding: 0 24px 64px; display: flex; flex-direction: column; align-items: center; }
 
-/* ── HEADER ── */
-#main-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(255,255,255,0.88);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(0,10,50,0.06);
-  margin: 0 -20px;
-  padding: 13px 20px;
-}
-.header-inner {
-  max-width: 1080px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  cursor: pointer;
-  user-select: none;
-}
-.logo-icon { font-size: 20px; }
-.logo-text {
-  font-size: 17px;
-  font-weight: 700;
-  background: linear-gradient(120deg, var(--pro), var(--con));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.level-pill {
-  background: linear-gradient(135deg, var(--pro), #8b5cf6);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.xp-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.xp-track {
-  width: 72px;
-  height: 5px;
-  background: rgba(0,10,50,0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.xp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--pro), var(--green));
-  border-radius: 3px;
-  transition: width 0.7s cubic-bezier(.4,0,.2,1);
-}
-.xp-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 5px 11px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-/* ── HOME ── */
+/* ── HERO ── */
 .hero {
-  padding: 64px 0 48px;
   text-align: center;
+  padding: 72px 0 56px;
 }
-.hero h1 {
-  font-size: clamp(34px, 7vw, 58px);
-  font-weight: 800;
-  line-height: 1.12;
+.hero-logo { font-size: 52px; margin-bottom: 16px; }
+.hero-title {
+  font-size: clamp(36px, 7vw, 60px);
+  font-weight: 900;
+  line-height: 1.1;
   margin-bottom: 18px;
-  background: linear-gradient(135deg, #3a78e0 0%, #8b5cf6 50%, #d96830 100%);
+  background: linear-gradient(135deg, #3a78e0 0%, #8b5cf6 45%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .hero-sub {
-  font-size: 17px;
-  color: var(--muted);
-  max-width: 540px;
-  margin: 0 auto 36px;
+  font-size: 18px;
+  color: #6172a0;
+  max-width: 500px;
+  margin: 0 auto;
   line-height: 1.65;
 }
-.hero-stats {
+
+/* ── PORTALS ── */
+.portals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  width: 100%;
+  margin-bottom: 48px;
+}
+@media (max-width: 620px) { .portals { grid-template-columns: 1fr; } }
+
+.portal {
+  border-radius: 24px;
+  padding: 36px 30px 30px;
+  text-decoration: none;
   display: flex;
-  justify-content: center;
-  gap: 40px;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  position: relative;
+  overflow: hidden;
 }
-.hero-stat-num {
-  font-size: 30px;
-  font-weight: 800;
-  color: var(--pro);
+
+/* Kids */
+.portal-kids {
+  background: linear-gradient(145deg, #7c3aed 0%, #a855f7 45%, #ec4899 100%);
+  color: white;
+  box-shadow: 0 8px 32px rgba(124,58,237,0.28), 0 0 0 1px rgba(124,58,237,0.15);
 }
-.hero-stat-label {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 3px;
+.portal-kids:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 18px 48px rgba(124,58,237,0.38), 0 0 0 1px rgba(124,58,237,0.2);
 }
-.section-label {
+.portal-kids::after {
+  content: '⭐✨🌈';
+  position: absolute;
+  top: 16px; right: 20px;
+  font-size: 22px;
+  opacity: 0.55;
+  letter-spacing: -4px;
+}
+
+/* Adult */
+.portal-adult {
+  background: #ffffff;
+  color: #1a2038;
+  box-shadow: 0 4px 20px rgba(0,10,50,0.09), 0 0 0 1px rgba(0,10,50,0.06);
+}
+.portal-adult:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 40px rgba(0,10,50,0.14), 0 0 0 1px rgba(58,120,224,0.2);
+}
+.portal-adult::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3a78e0, #8b5cf6);
+  border-radius: 24px 24px 0 0;
+}
+
+.p-icon { font-size: 44px; line-height: 1; }
+.p-age {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 16px;
+  opacity: 0.7;
 }
+.portal-adult .p-age { color: #8b5cf6; opacity: 1; }
+.p-title { font-size: 27px; font-weight: 800; line-height: 1.2; }
+.p-desc { font-size: 15px; line-height: 1.6; opacity: 0.82; }
 
-/* ── TOPIC GRID ── */
-.topics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 14px;
-  margin-bottom: 56px;
-}
-.topic-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 22px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.topic-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--pro), var(--con));
-  opacity: 0;
-  transition: opacity 0.18s;
-}
-.topic-card:hover { background: var(--surface-hover); border-color: var(--border-hover); transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-.topic-card:hover::after { opacity: 1; }
-.topic-card.done { border-color: rgba(23,160,106,0.25); }
-.topic-card.done::after { background: var(--green); opacity: 0.7; }
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.topic-emoji { font-size: 30px; line-height: 1; }
-.done-badge {
-  background: rgba(23,160,106,0.1);
-  color: var(--green);
-  border: 1px solid rgba(23,160,106,0.28);
-  border-radius: 10px;
-  padding: 3px 9px;
-  font-size: 11px;
-  font-weight: 700;
-}
-.card-cat {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-.card-title { font-size: 17px; font-weight: 700; margin-bottom: 7px; line-height: 1.3; }
-.card-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
-
-/* ── BADGES ── */
-.badges-section { margin-top: 8px; }
-.badges-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.badge-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 11px 15px;
-  min-width: 155px;
-  transition: all 0.2s;
-  box-shadow: var(--shadow);
-}
-.badge-item.on { border-color: rgba(212,135,10,0.3); background: rgba(212,135,10,0.06); }
-.badge-item.off { opacity: 0.45; box-shadow: none; }
-.badge-e { font-size: 22px; }
-.badge-name { font-size: 13px; font-weight: 600; }
-.badge-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
-/* ── TOPIC SCREEN ── */
-#topic-screen { padding-top: 28px; }
-.back-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 6px 0;
-  margin-bottom: 28px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: color 0.15s;
-}
-.back-btn:hover { color: var(--text); }
-
-/* Phase stepper */
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 36px;
-  max-width: 360px;
-}
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  gap: 6px;
-}
-.step-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.p-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.p-tag {
+  padding: 4px 11px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  background: var(--surface);
-  transition: all 0.3s;
+  font-weight: 600;
 }
-.step.active .step-dot { border-color: var(--pro); color: var(--pro); background: var(--pro-bg); }
-.step.done .step-dot { border-color: var(--green); color: var(--green); background: rgba(23,160,106,0.1); }
-.step-label { font-size: 10px; color: var(--muted); white-space: nowrap; font-weight: 500; }
-.step.active .step-label { color: var(--text); }
-.step-line { flex: 0 0 32px; height: 2px; background: var(--border); margin-top: -6px; }
-.step-line.done { background: var(--green); }
+.portal-kids .p-tag { background: rgba(255,255,255,0.22); color: white; }
+.portal-adult .p-tag { background: rgba(58,120,224,0.08); color: #3a78e0; }
 
-/* Phase 1 */
-.topic-hero {
-  text-align: center;
-  padding: 28px 0 48px;
-  max-width: 660px;
-  margin: 0 auto;
+.p-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  width: fit-content;
+  transition: background 0.15s, transform 0.15s;
 }
-.cat-tag {
-  display: inline-block;
-  font-size: 10px;
+.portal-kids .p-btn { background: rgba(255,255,255,0.22); color: white; border: 2px solid rgba(255,255,255,0.4); }
+.portal-kids:hover .p-btn { background: rgba(255,255,255,0.32); }
+.portal-adult .p-btn { background: linear-gradient(135deg, #3a78e0, #8b5cf6); color: white; }
+
+/* ── HOW IT WORKS ── */
+.how {
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 2px 12px rgba(0,10,50,0.07), 0 0 0 1px rgba(0,10,50,0.05);
+  margin-bottom: 40px;
+}
+.how-title {
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--pro);
-  background: var(--pro-bg);
-  border: 1px solid rgba(58,120,224,0.22);
-  border-radius: 12px;
-  padding: 4px 12px;
-  margin-bottom: 16px;
+  color: #8b5cf6;
+  margin-bottom: 24px;
+  text-align: center;
 }
-.topic-hero h2 {
-  font-size: clamp(24px, 5vw, 40px);
-  font-weight: 800;
-  margin-bottom: 14px;
-  line-height: 1.2;
-}
-.topic-hero p { font-size: 16px; color: var(--muted); line-height: 1.65; }
-.stance-section { max-width: 560px; margin: 0 auto; }
-.stance-prompt { text-align: center; margin-bottom: 20px; }
-.stance-prompt h3 { font-size: 19px; font-weight: 700; margin-bottom: 7px; }
-.stance-prompt p { color: var(--muted); font-size: 14px; }
-.stance-btns { display: flex; flex-direction: column; gap: 9px; }
-.stance-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  padding: 14px 18px;
-  text-align: left;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  box-shadow: var(--shadow);
-}
-.stance-btn:hover { background: var(--surface-hover); border-color: var(--border-hover); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
-.stance-btn.sel-pro { background: var(--pro-bg); border-color: var(--pro); box-shadow: 0 0 0 3px rgba(58,120,224,0.12); }
-.stance-btn.sel-con { background: var(--con-bg); border-color: var(--con); box-shadow: 0 0 0 3px rgba(217,104,48,0.12); }
-.stance-btn.sel-neutral { background: rgba(94,110,150,0.07); border-color: rgba(94,110,150,0.35); box-shadow: 0 0 0 3px rgba(94,110,150,0.08); }
-.s-icon { font-size: 17px; width: 26px; text-align: center; flex-shrink: 0; }
-
-/* Phase 2 */
-.p2-header { text-align: center; margin-bottom: 36px; }
-.p2-header h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-.p2-header p { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
-.stance-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: 13px;
-  color: var(--muted);
-  box-shadow: var(--shadow);
-}
-.stance-badge strong { color: var(--text); }
-.args-grid {
+.steps {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-bottom: 52px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
-@media (max-width: 680px) { .args-grid { grid-template-columns: 1fr; } }
-.args-col {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.col-head {
-  padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-.pro-col .col-head { background: var(--pro-bg); border-bottom: 1px solid rgba(58,120,224,0.14); }
-.con-col .col-head { background: var(--con-bg); border-bottom: 1px solid rgba(217,104,48,0.14); }
-.col-head-icon { font-size: 22px; }
-.col-title { font-size: 16px; font-weight: 700; }
-.pro-col .col-title { color: var(--pro); }
-.con-col .col-title { color: var(--con); }
-.args-list { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.arg-card {
-  background: #f8faff;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 15px;
-  cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
-}
-.arg-card:hover { background: #f0f4ff; border-color: var(--border-hover); }
-.arg-card.open { background: #f0f4ff; border-color: rgba(58,120,224,0.2); }
-.arg-headline {
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  line-height: 1.4;
-}
-.arg-toggle { font-size: 11px; color: var(--muted); flex-shrink: 0; transition: transform 0.2s; }
-.arg-card.open .arg-toggle { transform: rotate(180deg); }
-.arg-body {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.65;
-  margin-top: 11px;
-  display: none;
-}
-.arg-card.open .arg-body { display: block; }
-.read-tracker {
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+.step {
   text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 28px;
-}
-.read-tracker span { color: var(--pro); font-weight: 600; }
-.final-prompt { max-width: 560px; margin: 0 auto; text-align: center; }
-.final-prompt h3 { font-size: 20px; font-weight: 700; margin-bottom: 7px; }
-.final-prompt > p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
-
-/* Phase 3 */
-.results-wrap {
-  max-width: 540px;
-  margin: 0 auto;
-  text-align: center;
-  padding: 48px 0 24px;
-}
-.result-icon {
-  font-size: 68px;
-  margin-bottom: 20px;
-  display: block;
-  animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.result-title { font-size: 30px; font-weight: 800; margin-bottom: 12px; }
-.result-msg {
-  font-size: 16px;
-  color: var(--muted);
-  line-height: 1.65;
-  margin-bottom: 32px;
-  max-width: 430px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.xp-block {
-  background: rgba(212,135,10,0.07);
-  border: 1px solid rgba(212,135,10,0.25);
-  border-radius: var(--r);
-  padding: 22px 28px;
-  margin-bottom: 22px;
-  display: inline-block;
-  min-width: 220px;
-  box-shadow: var(--shadow);
-}
-.xp-big { font-size: 46px; font-weight: 800; color: var(--gold); line-height: 1; }
-.xp-block-label { font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 14px; }
-.xp-breakdown { text-align: left; border-top: 1px solid rgba(212,135,10,0.15); padding-top: 12px; }
-.xp-row {
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--muted);
-  padding: 3px 0;
-}
-.xp-row span:last-child { color: var(--gold); font-weight: 600; }
-.compare-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 18px 20px;
-  margin-bottom: 22px;
-  text-align: left;
-  box-shadow: var(--shadow);
-}
-.compare-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.compare-row {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
 }
-.stance-pill {
-  border-radius: 12px;
-  padding: 5px 13px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.pill-pro { background: var(--pro-bg); color: var(--pro); border: 1px solid rgba(91,141,238,0.25); }
-.pill-con { background: var(--con-bg); color: var(--con); border: 1px solid rgba(240,146,78,0.25); }
-.pill-neutral { background: rgba(94,110,150,0.08); color: var(--text); border: 1px solid rgba(94,110,150,0.2); }
-.arrow-txt { color: var(--muted); font-size: 18px; }
-.new-badges { margin-bottom: 24px; }
-.unlock-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 10px;
-}
-.badge-unlock-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(212,135,10,0.07);
-  border: 1px solid rgba(212,135,10,0.25);
-  border-radius: 12px;
-  padding: 10px 16px;
-  margin: 4px;
-  box-shadow: var(--shadow);
-  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.cta-btn {
-  background: linear-gradient(135deg, var(--pro), #8b5cf6);
-  border: none;
-  border-radius: var(--r-sm);
-  color: #fff;
-  cursor: pointer;
+.step-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3a78e0, #8b5cf6);
+  color: white;
   font-size: 16px;
-  font-weight: 600;
-  padding: 15px 40px;
-  transition: all 0.2s;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,141,238,0.38); }
+.step-label { font-size: 15px; font-weight: 700; color: #1a2038; }
+.step-desc { font-size: 13px; color: #6172a0; line-height: 1.5; }
 
-/* Utilities */
-.hidden { display: none !important; }
-.phase { animation: fadeUp 0.3s ease; }
-
-/* Animations */
-@keyframes bounceIn {
-  0%   { transform: scale(0.4); opacity: 0; }
-  60%  { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes popIn {
-  0%   { transform: scale(0.75); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Mobile header */
-@media (max-width: 520px) {
-  .level-pill { display: none; }
-  .xp-track { width: 50px; }
+/* ── FOOTER ── */
+footer {
+  font-size: 13px;
+  color: #9aa5c0;
+  text-align: center;
+  padding: 8px 0;
 }
 </style>
 </head>
 <body>
-<canvas id="confetti-canvas"></canvas>
+<div id="wrap">
+  <div class="hero">
+    <div class="hero-logo">⚖️</div>
+    <h1 class="hero-title">PerspectiveShift</h1>
+    <p class="hero-sub">Every debate has two sides worth hearing. Pick your version and start thinking.</p>
+  </div>
 
-<div id="app">
-  <!-- ── HEADER ── -->
-  <header id="main-header">
-    <div class="header-inner">
-      <div class="logo" onclick="goHome()">
-        <span class="logo-icon">⚖️</span>
-        <span class="logo-text">PerspectiveShift</span>
+  <div class="portals">
+    <a class="portal portal-kids" href="kids.html">
+      <div class="p-icon">🦉</div>
+      <div class="p-age">Ages 8 – 12</div>
+      <div class="p-title">PerspectiveShift<br>for Kids</div>
+      <p class="p-desc">Explore fun, real topics kids care about! Earn stars and unlock badges by reading both sides.</p>
+      <div class="p-tags">
+        <span class="p-tag">📱 Screen Time</span>
+        <span class="p-tag">🎒 Homework</span>
+        <span class="p-tag">👔 Uniforms</span>
+        <span class="p-tag">🐾 Class Pets</span>
       </div>
-      <div class="header-right">
-        <div class="level-pill" id="level-pill">Level 1 · Curious</div>
-        <div class="xp-wrap">
-          <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
-          <span class="xp-label" id="xp-label">0 XP</span>
-        </div>
-        <div class="chip">🧠 <span id="hdr-minds">0</span></div>
-      </div>
-    </div>
-  </header>
+      <div class="p-btn">Let's Explore! →</div>
+    </a>
 
-  <!-- ── HOME ── -->
-  <div id="home-screen">
-    <div class="hero">
-      <h1>Challenge Your<br>Perspective</h1>
-      <p class="hero-sub">Explore both sides of today's most debated topics. Engage with opposing views and earn rewards for an open mind.</p>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="s-explored">0</div>
-          <div class="hero-stat-label">explored</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="s-xp">0</div>
-          <div class="hero-stat-label">XP earned</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="s-minds">0</div>
-          <div class="hero-stat-label">mind shifts</div>
-        </div>
+    <a class="portal portal-adult" href="adult.html">
+      <div class="p-icon">🧠</div>
+      <div class="p-age">Ages 13 & up</div>
+      <div class="p-title">PerspectiveShift</div>
+      <p class="p-desc">Challenge your views on today's most debated topics. Earn XP and rewards for an open mind.</p>
+      <div class="p-tags">
+        <span class="p-tag">💰 Economics</span>
+        <span class="p-tag">🤖 AI & Tech</span>
+        <span class="p-tag">⚛️ Energy</span>
+        <span class="p-tag">🗣️ Free Speech</span>
       </div>
-    </div>
-    <div class="section-label">Choose a Topic</div>
-    <div class="topics-grid" id="topics-grid"></div>
-    <div class="badges-section">
-      <div class="section-label">Achievements</div>
-      <div class="badges-grid" id="badges-grid"></div>
+      <div class="p-btn">Start Exploring →</div>
+    </a>
+  </div>
+
+  <div class="how">
+    <div class="how-title">How It Works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-label">Pick a Side</div>
+        <div class="step-desc">Before seeing any arguments, share where you stand on the topic.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-label">Read Both Sides</div>
+        <div class="step-desc">Explore the strongest arguments for and against the topic.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-label">Earn Rewards</div>
+        <div class="step-desc">Get points for engaging — and a bonus if you change your mind!</div>
+      </div>
     </div>
   </div>
 
-  <!-- ── TOPIC SCREEN ── -->
-  <div id="topic-screen" class="hidden">
-
-    <!-- Phase 1: Initial Stance -->
-    <div id="phase-1" class="phase">
-      <button class="back-btn" onclick="goHome()">← All topics</button>
-      <div class="stepper" id="stepper-1">
-        <div class="step active" id="st1"><div class="step-dot">1</div><div class="step-label">Your Stance</div></div>
-        <div class="step-line" id="sl1"></div>
-        <div class="step" id="st2"><div class="step-dot">2</div><div class="step-label">Both Sides</div></div>
-        <div class="step-line" id="sl2"></div>
-        <div class="step" id="st3"><div class="step-dot">3</div><div class="step-label">Results</div></div>
-      </div>
-      <div class="topic-hero">
-        <div class="cat-tag" id="p1-cat"></div>
-        <h2 id="p1-title"></h2>
-        <p id="p1-desc"></p>
-      </div>
-      <div class="stance-section">
-        <div class="stance-prompt">
-          <h3>Before seeing any arguments — where do you stand?</h3>
-          <p>Be honest. There are no wrong answers.</p>
-        </div>
-        <div class="stance-btns" id="p1-btns"></div>
-      </div>
-    </div>
-
-    <!-- Phase 2: Arguments -->
-    <div id="phase-2" class="phase hidden">
-      <button class="back-btn" onclick="showPhase(1)">← Change initial stance</button>
-      <div class="stepper">
-        <div class="step done"><div class="step-dot">✓</div><div class="step-label">Your Stance</div></div>
-        <div class="step-line done"></div>
-        <div class="step active"><div class="step-dot">2</div><div class="step-label">Both Sides</div></div>
-        <div class="step-line"></div>
-        <div class="step"><div class="step-dot">3</div><div class="step-label">Results</div></div>
-      </div>
-      <div class="p2-header">
-        <h3 id="p2-title"></h3>
-        <p>Click any argument to expand it and read more.</p>
-        <div class="stance-badge">Your initial stance: <strong id="p2-initial"></strong></div>
-      </div>
-      <div id="read-tracker" class="read-tracker">Read <span id="read-count">0</span> of 8 arguments</div>
-      <div class="args-grid">
-        <div class="args-col pro-col">
-          <div class="col-head">
-            <span class="col-head-icon">💙</span>
-            <span class="col-title" id="p2-pro-title"></span>
-          </div>
-          <div class="args-list" id="p2-pro-args"></div>
-        </div>
-        <div class="args-col con-col">
-          <div class="col-head">
-            <span class="col-head-icon">🔶</span>
-            <span class="col-title" id="p2-con-title"></span>
-          </div>
-          <div class="args-list" id="p2-con-args"></div>
-        </div>
-      </div>
-      <div class="final-prompt">
-        <h3>Now that you've read both sides…</h3>
-        <p>Where do you stand? It's okay to change your mind — or to hold firm.</p>
-        <div class="stance-btns" id="p2-btns"></div>
-      </div>
-    </div>
-
-    <!-- Phase 3: Results -->
-    <div id="phase-3" class="phase hidden">
-      <div class="results-wrap">
-        <span class="result-icon" id="p3-icon"></span>
-        <h2 class="result-title" id="p3-title"></h2>
-        <p class="result-msg" id="p3-msg"></p>
-        <div class="xp-block">
-          <div class="xp-big" id="p3-xp">+0</div>
-          <div class="xp-block-label">XP earned</div>
-          <div class="xp-breakdown" id="p3-breakdown"></div>
-        </div>
-        <div class="compare-card">
-          <div class="compare-label">Your Journey</div>
-          <div class="compare-row" id="p3-compare"></div>
-        </div>
-        <div class="new-badges" id="p3-badges"></div>
-        <button class="cta-btn" onclick="goHome()">Explore More Topics</button>
-      </div>
-    </div>
-
-  </div><!-- /topic-screen -->
-</div><!-- /app -->
-
-<script>
-// ──────────────────────────────────────────
-//  DATA
-// ──────────────────────────────────────────
-
-const STANCES = [
-  { v:  2, label: 'Strongly For',      icon: '✊', cls: 'sel-pro' },
-  { v:  1, label: 'Somewhat For',      icon: '👍', cls: 'sel-pro' },
-  { v:  0, label: 'Neutral / Unsure',  icon: '🤔', cls: 'sel-neutral' },
-  { v: -1, label: 'Somewhat Against',  icon: '👎', cls: 'sel-con' },
-  { v: -2, label: 'Strongly Against',  icon: '✋', cls: 'sel-con' },
-];
-
-const stanceMap = {};
-STANCES.forEach(s => { stanceMap[s.v] = s; });
-
-const LEVELS = [
-  { name: 'Curious',     min: 0 },
-  { name: 'Thinker',     min: 100 },
-  { name: 'Philosopher', min: 280 },
-  { name: 'Sage',        min: 550 },
-  { name: 'Enlightened', min: 1000 },
-];
-
-const BADGES = [
-  { id: 'first',  e: '🌱', name: 'First Step',       desc: 'Explore your first topic',      ok: s => s.done.length >= 1 },
-  { id: 'open',   e: '🧠', name: 'Open Mind',         desc: 'Change your mind once',         ok: s => s.shifts >= 1 },
-  { id: 'half',   e: '🗺️', name: 'Explorer',          desc: 'Complete 4 topics',             ok: s => s.done.length >= 4 },
-  { id: 'thrice', e: '🌀', name: 'Paradigm Shift',    desc: 'Change your mind 3 times',      ok: s => s.shifts >= 3 },
-  { id: 'seeker', e: '🔍', name: 'Truth Seeker',      desc: 'Earn 500+ XP',                  ok: s => s.xp >= 500 },
-  { id: 'all',    e: '🏆', name: 'Completionist',     desc: 'Explore every topic',           ok: s => s.done.length >= TOPICS.length },
-];
-
-const TOPICS = [
-  {
-    id: 'ubi',
-    emoji: '💰',
-    cat: 'Economics',
-    title: 'Universal Basic Income',
-    sub: 'Should every adult citizen receive a guaranteed monthly income from the government, regardless of employment status?',
-    proTitle: 'The Case For UBI',
-    conTitle: 'The Case Against UBI',
-    pro: [
-      { h: 'Eliminates the poverty floor', b: 'A guaranteed income means no one falls below a basic standard of living. Pilot programs in Kenya, Finland, and Stockton, CA showed meaningful reductions in food insecurity and measurable mental health improvements among recipients.' },
-      { h: 'Enables entrepreneurship and risk-taking', b: "With a financial safety net, people are more willing to start businesses, pursue education, or leave exploitative jobs. Finland's two-year trial found that UBI recipients launched companies at higher rates than the control group." },
-      { h: 'Prepares society for the automation wave', b: "McKinsey estimates 375 million workers may need to switch jobs by 2030 due to AI and robotics. UBI provides a transition buffer, preventing mass destitution as the economy restructures. No prior generation has faced a displacement of cognitive labor at this scale." },
-      { h: 'Simplifies a broken welfare bureaucracy', b: "Replacing dozens of overlapping, conditional programs with one universal payment reduces administrative overhead, eliminates means-testing stigma, and covers gaps that existing programs miss. Andrew Yang estimated it could save hundreds of billions in bureaucratic costs alone." },
-    ],
-    con: [
-      { h: 'The math is prohibitively expensive', b: "Giving every U.S. adult $1,000/month costs roughly $3 trillion annually — more than the entire federal discretionary budget. Funding it requires either unsustainable deficits or tax increases large enough to trigger their own economic drag." },
-      { h: 'Could meaningfully reduce labor supply', b: "Economic models consistently show UBI would reduce labor force participation by 5–10%. Less work means lower GDP, reduced tax revenue, and a potentially self-reinforcing spiral in which funding becomes harder as fewer people contribute to it." },
-      { h: 'Inflation may consume the benefit', b: "Injecting trillions into the economy without corresponding productivity gains risks significant inflation — especially in housing. History suggests that when you give people more money without increasing supply, prices rise to absorb it." },
-      { h: 'Targeted aid outperforms universal payments', b: "Means-tested programs direct resources where they matter most. Giving identical payments to billionaires and the homeless is wasteful. Conditional programs — job training, childcare subsidies, housing vouchers — often show stronger per-dollar outcomes for specific vulnerable groups." },
-    ],
-  },
-  {
-    id: 'ai_jobs',
-    emoji: '🤖',
-    cat: 'Technology',
-    title: 'AI & Job Displacement',
-    sub: 'Is AI an existential threat to human employment, or is this just another technological transition that will create more jobs than it destroys?',
-    proTitle: 'AI Threatens Mass Unemployment',
-    conTitle: 'AI Will Create New Opportunities',
-    pro: [
-      { h: 'This time is genuinely different', b: "Previous automation replaced physical labor; AI replaces cognitive labor. For the first time, machines can write, reason, code, and analyze. The 50% of jobs classified as 'routine cognitive work' have no historical precedent for this kind of replacement." },
-      { h: 'Displacement is outpacing retraining', b: "Goldman Sachs estimates AI could displace 300M full-time jobs globally. Retraining programs succeed only 30–40% of the time, and transitions take years of income loss. AI is being deployed in months, not the decades that prior technology transitions allowed for adaptation." },
-      { h: 'The impact is concentrated among the vulnerable', b: "The jobs most exposed — customer service, data entry, paralegal work, junior coding — are middle-income roles held by people with limited resources to retrain or relocate. The disruption won't be evenly spread; it will hit already-stressed communities hardest." },
-      { h: 'Productivity gains won\'t be shared', b: "The benefits of automation historically flow to capital owners. A single engineer with AI tools can now replace dozens of workers. Without deliberate policy intervention, the gains will concentrate at the top while the costs spread across society." },
-    ],
-    con: [
-      { h: 'Every wave of technology created more jobs than it destroyed', b: "ATMs didn't eliminate bank tellers — they made branches cheaper to run, so banks opened more of them. The internet eliminated travel agents but created millions of digital economy jobs. Historically, technology expands the pie rather than shrinking it." },
-      { h: 'AI augments most workers rather than replacing them', b: "Studies of actual AI deployment show that in most roles, AI becomes a tool that makes workers more productive, not obsolete. Radiologists using AI detect 37% more cancers. Lawyers using AI close cases faster. Humans stay in the loop on judgment calls." },
-      { h: 'Labor markets invent entirely new job categories', b: "Nobody in 1995 was a 'social media manager,' 'UX researcher,' or 'data scientist.' AI will create job categories we can't yet name — AI trainers, prompt engineers, AI auditors, and human-AI collaboration specialists are already emerging." },
-      { h: 'Demographic decline means we desperately need productivity', b: "Japan, Germany, and South Korea face severe labor shortages from aging populations. They need productivity gains just to sustain current living standards. AI may be the only viable path to maintaining social services with a shrinking workforce." },
-    ],
-  },
-  {
-    id: 'moderation',
-    emoji: '🗣️',
-    cat: 'Free Speech',
-    title: 'Social Media Moderation',
-    sub: 'Should platforms aggressively moderate harmful content, or does that give private companies dangerous control over public discourse?',
-    proTitle: 'For Stronger Moderation',
-    conTitle: 'Against Content Moderation',
-    pro: [
-      { h: 'Misinformation causes measurable real-world harm', b: "COVID-19 vaccine misinformation on Facebook was linked to reduced vaccination rates in multiple peer-reviewed studies. Anti-vaccine content on YouTube demonstrably cost lives. When platforms host and amplify this content, they are not neutral — they are participating." },
-      { h: 'Platforms already make editorial choices', b: "These companies curate what you see via algorithmic amplification. Choosing which content to boost IS an editorial decision. Refusing to moderate extremist content is itself a choice — one that systematically rewards outrage, fear, and radicalization over accuracy." },
-      { h: 'Hate speech correlates with real-world violence', b: "Facebook's own leaked research linked its platform to ethnic violence in Myanmar. Terrorist attacks have been directly tied to online radicalization pipelines. The connection between unchecked online hate speech and physical violence is no longer theoretical." },
-      { h: 'Private companies are entitled to set community standards', b: "The First Amendment restricts government censorship, not private platforms. Twitter is no more obligated to host all speech than a newspaper is. These are private spaces, and operators have the legal and ethical right — arguably the duty — to enforce community standards." },
-    ],
-    con: [
-      { h: '"Misinformation" is contested and politically applied', b: "The same platforms that banned discussion of the COVID lab-leak hypothesis later acknowledged it was plausible. When fact-checking is outsourced to governments and partisan NGOs, platforms systematically suppress minority viewpoints — including correct ones." },
-      { h: 'Five companies should not control what 4 billion people can say', b: "This concentration of editorial power has no historical precedent. Even if today's moderators have good intentions, they are building infrastructure for censorship that will outlast any individual administration or corporate leadership team." },
-      { h: 'Moderation algorithms have systematic biases', b: "Multiple independent audits show AI content moderation disproportionately flags speech in African-American Vernacular English, non-Western political contexts, and by marginalized communities. Well-intentioned moderation systematically silences those it claims to protect." },
-      { h: 'Deplatforming can accelerate radicalization', b: "Removing extremists from major platforms doesn't eliminate them — it drives them to unmoderated spaces where they only interact with true believers. Some research suggests deplatforming accelerates radicalization rather than preventing it, by removing moderating voices." },
-    ],
-  },
-  {
-    id: 'nuclear',
-    emoji: '⚛️',
-    cat: 'Energy',
-    title: 'Nuclear Energy',
-    sub: 'Should nuclear energy be a central pillar of our strategy to address climate change, or does its risk profile disqualify it?',
-    proTitle: 'For Nuclear Energy',
-    conTitle: 'Against Nuclear Energy',
-    pro: [
-      { h: 'Lowest lifecycle carbon of any firm power source', b: "Nuclear emits just 12g CO₂-equivalent per kWh over its lifecycle — comparable to wind (11g) and dramatically below gas (490g) or coal (820g). For dispatchable, 24/7 power, no low-carbon technology comes close to nuclear's density." },
-      { h: 'Statistically the safest energy source per kWh', b: "Per unit of energy produced, nuclear kills fewer people than any other source — including rooftop solar (installation accidents) and wind. Even including Chernobyl and Fukushima combined, nuclear has caused fewer deaths per TWh than fossil fuels by orders of magnitude." },
-      { h: 'Unmatched energy density and land footprint', b: "A single nuclear plant produces as much electricity as 430 wind turbines, occupying a fraction of the land. Nuclear provides 10% of global electricity from a land footprint smaller than some farms — critical for land-constrained nations." },
-      { h: 'Provides reliable baseload that renewables cannot', b: "Solar and wind are intermittent by physics. Nuclear runs at 90%+ capacity factor regardless of weather, season, or time of day. Germany replaced nuclear with coal and gas after Fukushima, and its emissions rose. France's largely nuclear grid remains among Europe's cleanest." },
-    ],
-    con: [
-      { h: 'Construction costs and timelines are catastrophic', b: "New nuclear plants in Western countries consistently cost 3–5× their initial estimates and arrive years late. Georgia's Vogtle Unit 3 cost $17 billion and took 14 years to build. At these economics, utility-scale solar and wind with battery storage are dramatically cheaper." },
-      { h: 'Nuclear waste remains lethal for millennia', b: "We have no permanent geological storage for high-level nuclear waste anywhere in the world. The U.S. alone has accumulated 90,000 metric tons of spent fuel sitting in temporary storage, with no approved permanent solution. We are deferring this burden to thousands of future generations." },
-      { h: 'Civilian programs cannot be cleanly separated from weapons risk', b: "Every nation that has developed nuclear weapons started with or was aided by civilian programs. Spreading nuclear technology globally — including to unstable states — increases the number of actors capable of weapons development. Iran and North Korea demonstrate this is not theoretical." },
-      { h: 'Renewables + storage can decarbonize the grid without it', b: "Denmark, Scotland, and Uruguay run substantially on renewables for significant periods. Battery storage costs have fallen 90% in a decade. The most optimistic decarbonization scenarios rely on massive renewable deployment, not new nuclear, to hit climate targets on the necessary timeline." },
-    ],
-  },
-  {
-    id: 'fourday',
-    emoji: '📅',
-    cat: 'Labor',
-    title: 'Four-Day Work Week',
-    sub: 'Should governments mandate a four-day standard work week with no reduction in pay, or does the evidence not support universal adoption?',
-    proTitle: 'For a 4-Day Week',
-    conTitle: 'Against a 4-Day Week',
-    pro: [
-      { h: 'Productivity stays constant or improves', b: "Microsoft Japan's 4-day trial boosted productivity by 40%. Iceland's 4-year experiment across 2,500 public sector workers found equivalent or improved output across healthcare, schools, and social services. Overworked people are inefficient — a rested worker does more in less time." },
-      { h: 'Dramatically improves worker wellbeing', b: "The UK's 61-company pilot found significant reductions in stress, burnout, and sick days. Workers reported better mental and physical health. Since burnout and depression already cost employers an estimated $1 trillion annually in lost productivity, healthier workers benefit everyone." },
-      { h: 'Meaningful climate and infrastructure benefits', b: "One fewer commute day per week means ~20% less commuting emissions and road wear. It also distributes leisure and errands across more days, reducing peak crowding on public transit and in commercial districts — compounding the gains beyond the individual." },
-      { h: 'Enables caregiving, learning, and civic life', b: "A three-day weekend gives people time for childcare, eldercare, education, and community participation that a two-day weekend simply doesn't allow. This benefit is especially significant for women, who disproportionately bear informal care burdens alongside full-time work." },
-    ],
-    con: [
-      { h: 'Many industries cannot function on 4 days', b: "Hospitals, restaurants, retail, and manufacturing require continuous coverage. A 4-day week either means remaining staff work 10-hour shifts (identical total labor), or services are simply unavailable on day 5 — neither of which represents the simple improvement proponents suggest." },
-      { h: 'Productivity gains may not generalize', b: "Microsoft Japan ran a software office where workers can flexibly compress tasks. Healthcare workers, factory operators, and baristas cannot compress their work the same way. Productivity gains measured in knowledge work may have no relationship to what happens in time-constrained, physical roles." },
-      { h: 'Represents a genuine cost increase for thin-margin businesses', b: "Same pay for 20% fewer hours raises the effective hourly wage by 25%. For businesses operating on 2–5% margins — restaurants, retail, logistics — this isn't a redistribution of hours but a direct threat to viability, particularly for small and independent operators." },
-      { h: 'May entrench inequality between sectors', b: "White-collar workers who can compress tasks get 3-day weekends. Service workers who can't remain on 5-day schedules. A policy designed to improve work-life balance could deepen the leisure gap between knowledge workers and those in less flexible industries — exacerbating existing class divides." },
-    ],
-  },
-  {
-    id: 'crypto',
-    emoji: '₿',
-    cat: 'Finance',
-    title: 'Cryptocurrency as Money',
-    sub: 'Will cryptocurrency eventually displace traditional government-issued currencies, or does it fail the basic tests of functional money?',
-    proTitle: 'Crypto Will Replace Fiat',
-    conTitle: 'Crypto Fails as Money',
-    pro: [
-      { h: 'Solves the trust problem in financial systems', b: "Bitcoin's blockchain is the first mechanism in history that lets two parties transact without trusting each other or a shared middleman. This mathematical guarantee of scarcity and settlement finality is a genuine technical breakthrough with no prior equivalent." },
-      { h: 'Protects against government currency debasement', b: "The U.S. dollar has lost 97% of its purchasing power since 1913. Bitcoin's hard cap of 21 million coins provides a mathematically enforced alternative. Citizens of hyperinflationary economies in Venezuela, Turkey, and Argentina have used it as precisely this hedge with measurable success." },
-      { h: 'Enables financial inclusion for the unbanked', b: "Over 1.4 billion adults lack bank accounts but many own smartphones. Crypto enables peer-to-peer transactions, cross-border remittances at 1–2% vs. 7% for wire transfers, and access to financial services without government-issued ID or credit history requirements." },
-      { h: 'Programmable money creates entirely new financial primitives', b: "Smart contracts enable trustless lending, insurance, and automated market-making without intermediaries. DeFi protocols have processed trillions in transactions. This programmability represents a capability traditional finance structurally cannot replicate." },
-    ],
-    con: [
-      { h: 'Extreme volatility makes it useless for exchange', b: "Bitcoin has lost 70–80% of its value multiple times within single years. A currency that might be worth half as much next month creates insurmountable problems for pricing, wages, contracts, and debt. No rational merchant prices goods in Bitcoin — they price in fiat and accept Bitcoin as a converted payment." },
-      { h: 'Proof-of-work consumes extraordinary energy with no productive output', b: "Bitcoin's consensus mechanism consumes more electricity than many mid-sized countries — primarily to solve arbitrary mathematical puzzles. This energy expenditure produces no social value beyond securing the ledger. At minimum, this is a massive externality that markets don't price in." },
-      { h: 'Primarily serves speculation and illicit activity', b: "Despite improving compliance infrastructure, a disproportionate share of crypto value flows involve darknet markets, ransomware, sanctions evasion, and fraud. The legitimate use cases — remittances, DeFi — remain a fraction of actual transaction volume by value." },
-      { h: 'Money derives value from institutional backing, not scarcity alone', b: "The dollar's value comes from legal tender laws, the U.S. government's power to tax 330 million people, and the enforceability of dollar-denominated contracts. Scarcity alone does not make something money — tulip bulbs were scarce and valuable until they weren't. Bitcoin is backed by belief, which is inherently fragile." },
-    ],
-  },
-  {
-    id: 'remote',
-    emoji: '🏠',
-    cat: 'Labor',
-    title: 'Remote Work vs. Office',
-    sub: 'Should remote work be treated as a fundamental worker right, or do in-person requirements serve legitimate organizational needs?',
-    proTitle: 'Remote Work Is a Right',
-    conTitle: 'In-Person Has Irreplaceable Value',
-    pro: [
-      { h: 'Workers proved they are as productive at home', b: "Stanford economist Nicholas Bloom's large-scale research found remote workers 13% more productive than in-office counterparts. Companies that remained fully remote during and after 2020 reported no significant productivity decline across most knowledge-work functions." },
-      { h: 'The commute is a massive, uncompensated tax on workers', b: "Americans average 54 minutes of commuting daily — over 200 hours per year of unpaid time and personal expense. Eliminating this improves wellbeing, reduces carbon emissions, and represents a substantial raise in real compensation that no in-office benefit package can fully offset." },
-      { h: 'Opens employment to people previously excluded', b: "Remote work allows people with disabilities, chronic illness, or caregiving responsibilities to participate in the workforce in ways that rigid office schedules preclude. It lets companies hire the best talent globally rather than within commuting distance of expensive real estate." },
-      { h: 'Particularly benefits women and families', b: "Remote work has been shown to reduce the gender pay gap by enabling more continuous career participation for parents. The ability to be physically present for children without sacrificing professional growth is something office culture structurally denied for decades." },
-    ],
-    con: [
-      { h: 'Complex collaboration genuinely suffers remotely', b: "The spontaneous whiteboard session, the overheard conversation that sparks an idea, the ambient awareness of a team's work — these don't replicate in video calls. Apple, Google, and Stripe all concluded after years of remote work that innovation velocity and cross-team coordination meaningfully declined." },
-      { h: 'Early-career employees are structurally disadvantaged', b: "New and junior employees learn through proximity: overhearing how seniors handle difficult situations, observing informal norms, receiving impromptu mentorship. Remote work compounds advantages for experienced workers while removing the developmental scaffolding that early-career employees depend on most." },
-      { h: 'Organizational culture requires shared physical space', b: "The sense of shared mission, psychological safety, and social bonds that create high-performing teams are built through physical co-presence over time. Fully remote teams consistently show weaker belonging scores and higher voluntary attrition — costs that don't show up in short-term productivity measurements." },
-      { h: 'The productivity research is contested and field-specific', b: "Bloom's foundational study examined call center workers with highly measurable outputs. For complex, interdependent knowledge work — product development, research, strategy — productivity is harder to quantify and remote disadvantages may compound invisibly over multi-year timescales before becoming apparent." },
-    ],
-  },
-  {
-    id: 'meat',
-    emoji: '🌱',
-    cat: 'Environment',
-    title: 'Meat & Climate Policy',
-    sub: 'Should governments tax or regulate meat consumption to address its climate and environmental impact?',
-    proTitle: 'For Meat Regulation',
-    conTitle: 'Against Meat Regulation',
-    pro: [
-      { h: 'Livestock is a massive, underpriced climate driver', b: "Animal agriculture accounts for 14.5% of global greenhouse gas emissions (FAO). Beef production emits 20× more GHG per gram of protein than lentils. If cattle were a country, they would be the world's third-largest emitter — ahead of every nation except the U.S. and China." },
-      { h: 'Market prices omit enormous environmental costs', b: "The true cost of beef includes methane emissions, water usage (1,800 gallons per pound), deforestation of carbon sinks, and public health externalities. Without a carbon tax, consumers optimize for private cost while the social costs are distributed to everyone — a textbook market failure." },
-      { h: 'Industrial animal agriculture causes massive animal suffering', b: "Over 70 billion land animals are raised in industrial conditions annually, in environments that cause measurable suffering by any veterinary standard. Unlike individual consumer choices, policy shifts can transform entire systems — as demonstrated by every successful public health regulation in history." },
-      { h: 'Plant-based protein is nutritionally equivalent and increasingly cost-competitive', b: "The Academy of Nutrition and Dietetics confirms well-planned plant-based diets meet all nutritional needs at all life stages. The cost gap between conventional meat and plant alternatives has narrowed dramatically and continues to close. Policy can accelerate this transition while improving cardiovascular health outcomes." },
-    ],
-    con: [
-      { h: 'Food is a matter of cultural sovereignty and personal autonomy', b: "What people eat is tied to religion, ethnicity, income, and identity in ways that make government prescription uniquely invasive. Policies that restrict food choices have consistently triggered fierce cultural backlash, and for good reason — diet is one of the most intimate personal decisions humans make." },
-      { h: 'The solution is technology, not restriction', b: "Lab-grown meat, precision fermentation, and next-generation plant proteins can dramatically reduce emissions without restricting anyone's choices. Taxing conventional meat before affordable alternatives exist at scale disproportionately harms lower-income households — a regressive policy dressed as progressive environmentalism." },
-      { h: 'Over a billion people depend on livestock for survival', b: "Smallholder farmers across Sub-Saharan Africa, South Asia, and Latin America rely on livestock as their primary income and protein source. Regulatory attacks on meat production, driven largely by wealthy-nation consumers, would devastate rural economies and indigenous communities with negligible carbon footprints." },
-      { h: 'The emissions calculation is more complex than simple headlines', b: "Livestock on well-managed grasslands sequester carbon, cycle nutrients, and convert non-arable land into human food. Regenerative grazing systems can be net carbon-neutral or even positive. Blanket demonization of all meat production ignores this complexity and could eliminate ecological services we don't fully understand yet." },
-    ],
-  },
-];
-
-// ──────────────────────────────────────────
-//  STATE
-// ──────────────────────────────────────────
-
-const DEF = { xp: 0, shifts: 0, done: [], badges: [], tid: null, init: null };
-
-let S = (()=>{
-  try {
-    const raw = localStorage.getItem('ps_v2');
-    return raw ? { ...DEF, ...JSON.parse(raw) } : { ...DEF };
-  } catch { return { ...DEF }; }
-})();
-
-let openCount = 0;
-
-function save() { localStorage.setItem('ps_v2', JSON.stringify(S)); }
-
-// ──────────────────────────────────────────
-//  LEVEL
-// ──────────────────────────────────────────
-
-function levelInfo(xp) {
-  let li = 0;
-  for (let i = LEVELS.length - 1; i >= 0; i--) {
-    if (xp >= LEVELS[i].min) { li = i; break; }
-  }
-  const cur = LEVELS[li], nxt = LEVELS[li + 1];
-  const inL = xp - cur.min;
-  const need = nxt ? nxt.min - cur.min : 200;
-  return { n: li + 1, name: cur.name, pct: Math.min(100, (inL / need) * 100) };
-}
-
-// ──────────────────────────────────────────
-//  HEADER / HOME
-// ──────────────────────────────────────────
-
-function updateHeader() {
-  const L = levelInfo(S.xp);
-  document.getElementById('level-pill').textContent = `Level ${L.n} · ${L.name}`;
-  document.getElementById('xp-fill').style.width = L.pct + '%';
-  document.getElementById('xp-label').textContent = S.xp + ' XP';
-  document.getElementById('hdr-minds').textContent = S.shifts;
-}
-
-function renderHome() {
-  updateHeader();
-  document.getElementById('s-explored').textContent = S.done.length;
-  document.getElementById('s-xp').textContent = S.xp;
-  document.getElementById('s-minds').textContent = S.shifts;
-
-  // Topic grid
-  document.getElementById('topics-grid').innerHTML = TOPICS.map(t => {
-    const isDone = S.done.includes(t.id);
-    return `<div class="topic-card${isDone?' done':''}" onclick="startTopic('${t.id}')">
-      <div class="card-top">
-        <span class="topic-emoji">${t.emoji}</span>
-        ${isDone ? '<span class="done-badge">✓ Done</span>' : ''}
-      </div>
-      <div class="card-cat">${t.cat}</div>
-      <div class="card-title">${t.title}</div>
-      <div class="card-desc">${t.sub}</div>
-    </div>`;
-  }).join('');
-
-  // Badges
-  document.getElementById('badges-grid').innerHTML = BADGES.map(b => {
-    const on = S.badges.includes(b.id);
-    return `<div class="badge-item ${on?'on':'off'}">
-      <span class="badge-e">${on ? b.e : '🔒'}</span>
-      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
-    </div>`;
-  }).join('');
-}
-
-// ──────────────────────────────────────────
-//  NAVIGATION
-// ──────────────────────────────────────────
-
-function goHome() {
-  document.getElementById('home-screen').classList.remove('hidden');
-  document.getElementById('topic-screen').classList.add('hidden');
-  S.tid = null; S.init = null; save();
-  renderHome();
-}
-
-function showPhase(n) {
-  [1,2,3].forEach(i => {
-    document.getElementById('phase-'+i).classList.toggle('hidden', i !== n);
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ──────────────────────────────────────────
-//  TOPIC FLOW
-// ──────────────────────────────────────────
-
-function startTopic(id) {
-  const t = TOPICS.find(x => x.id === id);
-  if (!t) return;
-  S.tid = id; S.init = null; openCount = 0; save();
-
-  document.getElementById('home-screen').classList.add('hidden');
-  document.getElementById('topic-screen').classList.remove('hidden');
-
-  // Fill phase 1
-  document.getElementById('p1-cat').textContent = t.cat;
-  document.getElementById('p1-title').textContent = t.title;
-  document.getElementById('p1-desc').textContent = t.sub;
-  buildStanceBtns('p1-btns', 'pickInit', null);
-
-  showPhase(1);
-}
-
-function buildStanceBtns(cid, fn, sel) {
-  document.getElementById(cid).innerHTML = STANCES.map(s =>
-    `<button class="stance-btn${sel===s.v?' '+s.cls:''}" onclick="${fn}(${s.v})">
-       <span class="s-icon">${s.icon}</span>${s.label}
-     </button>`
-  ).join('');
-}
-
-function pickInit(v) {
-  S.init = v; save();
-  buildStanceBtns('p1-btns', 'pickInit', v);
-  setTimeout(loadPhase2, 280);
-}
-
-function loadPhase2() {
-  const t = TOPICS.find(x => x.id === S.tid);
-  if (!t) return;
-  openCount = 0;
-
-  document.getElementById('p2-title').textContent = t.title;
-  document.getElementById('p2-initial').textContent = stanceMap[S.init].label;
-  document.getElementById('p2-pro-title').textContent = t.proTitle;
-  document.getElementById('p2-con-title').textContent = t.conTitle;
-  document.getElementById('read-count').textContent = '0';
-
-  document.getElementById('p2-pro-args').innerHTML = t.pro.map((a, i) =>
-    `<div class="arg-card" id="arg-pro-${i}" onclick="toggleArg(this)">
-       <div class="arg-headline">${a.h}<span class="arg-toggle">▾</span></div>
-       <div class="arg-body">${a.b}</div>
-     </div>`
-  ).join('');
-
-  document.getElementById('p2-con-args').innerHTML = t.con.map((a, i) =>
-    `<div class="arg-card" id="arg-con-${i}" onclick="toggleArg(this)">
-       <div class="arg-headline">${a.h}<span class="arg-toggle">▾</span></div>
-       <div class="arg-body">${a.b}</div>
-     </div>`
-  ).join('');
-
-  buildStanceBtns('p2-btns', 'pickFinal', null);
-  showPhase(2);
-}
-
-function toggleArg(el) {
-  const wasOpen = el.classList.contains('open');
-  el.classList.toggle('open');
-  if (!wasOpen) {
-    openCount = Math.min(8, openCount + 1);
-    document.getElementById('read-count').textContent = openCount;
-  }
-}
-
-function pickFinal(v) {
-  const t = TOPICS.find(x => x.id === S.tid);
-  if (!t) return;
-
-  buildStanceBtns('p2-btns', 'pickFinal', v);
-
-  const init = S.init, final = v;
-  const changed = init !== final;
-  const shift = Math.abs(final - init);
-
-  // XP
-  let xp = 15, bkd = [{ l: 'Completed topic', x: 15 }];
-
-  if (openCount >= 8) { xp += 15; bkd.push({ l: 'Read all arguments', x: 15 }); }
-  else if (openCount >= 4) { xp += 8; bkd.push({ l: 'Read several arguments', x: 8 }); }
-
-  if (changed) {
-    const bonus = shift >= 2 ? 65 : 40;
-    xp += bonus;
-    bkd.push({ l: shift >= 2 ? 'Major perspective shift!' : 'Changed your mind!', x: bonus });
-    S.shifts++;
-  } else {
-    xp += 10;
-    bkd.push({ l: 'Stood firm after considering both sides', x: 10 });
-  }
-
-  if (!S.done.includes(t.id)) S.done.push(t.id);
-  S.xp += xp;
-
-  const newB = BADGES.filter(b => !S.badges.includes(b.id) && b.ok(S));
-  newB.forEach(b => S.badges.push(b.id));
-  save();
-
-  setTimeout(() => showResults(t, init, final, changed, shift, xp, bkd, newB), 220);
-}
-
-function showResults(t, init, final, changed, shift, xp, bkd, newB) {
-  const icon = changed ? (shift >= 2 ? '🌀' : '🧠') : '🔥';
-  const title = changed
-    ? (shift >= 2 ? 'Major Perspective Shift!' : 'You Changed Your Mind!')
-    : 'You Stood Your Ground!';
-  const msg = changed
-    ? `You started out ${stanceMap[init].label.toLowerCase()} and finished ${stanceMap[final].label.toLowerCase()} on ${t.title}. Reconsidering your position takes real intellectual courage.`
-    : `You weighed both sides carefully and remained ${stanceMap[final].label.toLowerCase()}. That's not stubbornness — that's conviction backed by evidence.`;
-
-  document.getElementById('p3-icon').textContent = icon;
-  document.getElementById('p3-title').textContent = title;
-  document.getElementById('p3-msg').textContent = msg;
-  document.getElementById('p3-xp').textContent = '+' + xp;
-
-  document.getElementById('p3-breakdown').innerHTML = bkd.map(b =>
-    `<div class="xp-row"><span>${b.l}</span><span>+${b.x} XP</span></div>`
-  ).join('');
-
-  // Stance comparison
-  const pilFor = v => {
-    const s = stanceMap[v];
-    const cls = v > 0 ? 'pill-pro' : v < 0 ? 'pill-con' : 'pill-neutral';
-    return `<span class="stance-pill ${cls}">${s.icon} ${s.label}</span>`;
-  };
-
-  document.getElementById('p3-compare').innerHTML =
-    pilFor(init) +
-    (changed ? `<span class="arrow-txt">→</span>${pilFor(final)}` : '');
-
-  // New badges
-  document.getElementById('p3-badges').innerHTML = newB.length
-    ? `<div class="unlock-label">🎉 Badge Unlocked</div>` +
-      newB.map(b => `<div class="badge-unlock-item">
-        <span style="font-size:22px">${b.e}</span>
-        <div><div style="font-weight:700;font-size:14px">${b.name}</div>
-        <div style="font-size:12px;color:var(--muted)">${b.desc}</div></div>
-      </div>`).join('')
-    : '';
-
-  showPhase(3);
-  updateHeader();
-
-  if (changed) setTimeout(confetti, 300);
-}
-
-// ──────────────────────────────────────────
-//  CONFETTI
-// ──────────────────────────────────────────
-
-function confetti() {
-  const cv = document.getElementById('confetti-canvas');
-  const cx = cv.getContext('2d');
-  cv.width = window.innerWidth;
-  cv.height = window.innerHeight;
-
-  const colors = ['#5b8dee','#f0924e','#4ecca3','#f5c842','#e56cf0','#ff6b8a','#54f7d9'];
-  const pts = Array.from({ length: 130 }, () => ({
-    x: Math.random() * cv.width,
-    y: -12,
-    r: Math.random() * 7 + 4,
-    dy: Math.random() * 8 + 4,
-    dx: Math.random() * 4 - 2,
-    col: colors[Math.random() * colors.length | 0],
-    ta: 0,
-    tai: 0.06 + Math.random() * 0.06,
-  }));
-
-  let f = 0;
-  function draw() {
-    cx.clearRect(0, 0, cv.width, cv.height);
-    pts.forEach(p => {
-      p.ta += p.tai;
-      p.y += p.dy;
-      p.x += p.dx + Math.sin(p.ta) * 1.5;
-      cx.beginPath();
-      cx.lineWidth = p.r;
-      cx.strokeStyle = p.col;
-      cx.moveTo(p.x + Math.sin(p.ta) * p.r, p.y);
-      cx.lineTo(p.x, p.y + p.r);
-      cx.stroke();
-    });
-    if (++f < 200) requestAnimationFrame(draw);
-    else cx.clearRect(0, 0, cv.width, cv.height);
-  }
-  draw();
-}
-
-// ──────────────────────────────────────────
-//  BOOT
-// ──────────────────────────────────────────
-
-renderHome();
-</script>
+  <footer>⚖️ PerspectiveShift — Challenge your thinking, not your values.</footer>
+</div>
 </body>
 </html>
